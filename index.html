@@ -222,6 +222,9 @@
   .meter-value { font-size: 12.5px; color: var(--ink); text-align: right; white-space: nowrap; }
   .meter-value .pct { font-weight: 700; }
   .meter-value .plan { color: var(--muted); }
+  .meter-track.bare { background: transparent; }
+  .meter-fill.bar { border-radius: 0 4px 4px 0; min-width: 2px; }
+  .meter.reg { padding: 5px 0; }
   .chart-empty { font-size: 13px; color: var(--muted); padding: 6px 0 2px; }
   .chart-legend { display: flex; gap: 18px; margin-top: 12px; font-size: 12px; color: var(--muted); }
   .chart-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
@@ -236,7 +239,36 @@
   }
   .conclusion .lbl { font-size: 11.5px; font-weight: 700; color: var(--green); margin-bottom: 2px; }
 
-  /* ================= Тексты для запросов ================= */
+  /* ================= Выгрузка данных ================= */
+  .brief-preview.is-slides { background: var(--paper); max-height: 560px; }
+  .slides { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .slide {
+    aspect-ratio: 16 / 9; background: #fff; border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+    display: flex; flex-direction: column; font-size: 8px; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .sl-head { background: var(--pine); color: #fff; font-weight: 700; font-size: 11px; padding: 7px 10px; border-bottom: 2px solid var(--lime);
+    display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; }
+  .sl-chip { margin-left: auto; background: var(--green-bg); color: var(--pine); border-radius: 8px; padding: 1px 7px; font-size: 7.5px; }
+  .sl-body { padding: 8px 10px; display: flex; flex-direction: column; gap: 7px; min-height: 0; flex: 1; overflow: hidden; }
+  .sl-tiles { display: flex; gap: 5px; }
+  .sl-tile { flex: 1; background: var(--paper); border: 1px solid var(--line); border-top: 2px solid var(--pine); padding: 3px 5px; min-width: 0; }
+  .sl-tile:first-child { border-top-color: var(--lime); }
+  .sl-tile b { display: block; font-size: 12px; color: var(--pine); }
+  .sl-tile span { display: block; color: var(--muted); font-size: 6.5px; line-height: 1.2; overflow: hidden; max-height: 16px; }
+  .sl-cols { display: flex; gap: 8px; min-height: 0; flex: 1; }
+  .sl-cols > * { flex: 1; min-width: 0; overflow: hidden; }
+  .sl-pts ul { margin: 0 0 0 10px; padding: 0; } .sl-pts li { margin-bottom: 2px; line-height: 1.25; }
+  .sl-pts p { margin: 0; line-height: 1.3; }
+  .sl-ct { font-weight: 700; margin-bottom: 3px; }
+  .sl-bar { display: grid; grid-template-columns: 38% 1fr auto; gap: 4px; align-items: center; margin-bottom: 2px; }
+  .sl-bar span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .sl-bar i { display: block; height: 6px; background: var(--pine); border-radius: 0 2px 2px 0; min-width: 1px; }
+  .sl-tbl { width: 100%; border-collapse: collapse; } .sl-tbl td { border-bottom: 1px solid var(--line); padding: 2px 3px; font-size: 7px; }
+  .sl-cover { background: var(--pine); color: #fff; justify-content: center; padding: 0 9%; position: relative; }
+  .sl-cover .sl-acc { position: absolute; left: 6%; top: 32%; width: 3px; height: 30%; background: var(--lime); }
+  .sl-big { font-size: 15px; font-weight: 800; line-height: 1.2; }
+  .sl-sub { color: #C9E3B0; font-size: 9px; margin-top: 4px; }
+  .sl-org { position: absolute; bottom: 8%; left: 9%; color: #C9CFC4; font-size: 7px; }
   .brief { margin-top: 14px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
   .tab {
@@ -401,8 +433,8 @@
         </div>
 
         <div class="section-title">
-          Справки для запросов
-          <span class="hint">пресса, Холдинг, годовой отчёт, встреча с ПП — по всем программам</span>
+          Выгрузка данных
+          <span class="hint">текст, таблица или презентация — по всем программам</span>
         </div>
         <div id="overview-brief"></div>
 
@@ -475,7 +507,11 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Сопровождение предпринимателей, оказавшихся в трудной финансовой ситуации: диагностика бизнеса, разработка плана финансового оздоровления, содействие в реструктуризации обязательств.",
       reach: [["Зарегистрировано обращений", "11", "—"], ["Исполнено обращений", "3", "—"], ["Обращений в работе", "8", "—"]],
-      geo:   [["Регионов охвата", "5"], ["Обращения по регионам", "Актюбинская обл. — 4, СКО — 3, Шымкент — 2, Алматы — 1, Астана — 1"], ["Формат", "очно / онлайн"]],
+      geo:   [["Регионов охвата", "5"], ["Формат", "очно / онлайн"]],
+      charts: [
+        { title: "Обращения по регионам", items: [["Актюбинская область", "4"], ["Северо-Казахстанская область", "3"], ["г. Шымкент", "2"], ["г. Алматы", "1"], ["г. Астана", "1"]] },
+        { title: "Обращения по статусу", items: [["Исполнено", "3"], ["В работе", "8"]] },
+      ],
       stages: [
         { name: "Запуск приёма заявок", state: "done", date: "—" },
         { name: "Диагностика и планы оздоровления", state: "now", date: "—" },
@@ -493,6 +529,9 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Комплексная программа обучения и менторского сопровождения начинающих предпринимателей: от идеи до запуска собственного дела.",
       reach: [["Допущено к акселерации", "96", "—"], ["Сформировано потоков", "4", "—"], ["Заседаний экспертной комиссии", "19", "—"]],
+      charts: [
+        { title: "Участники акселерации по регионам", items: [["г. Астана", "27"], ["г. Шымкент", "25"], ["Алматинская область", "23"], ["г. Алматы", "21"]] },
+      ],
       geo:   [["Регионов охвата", "4"], ["Участники по регионам", "Астана — 27, Шымкент — 25, Алматинская обл. — 23, Алматы — 21"], ["Формат", "офлайн / гибрид"]],
       stages: [
         { name: "Отбор и допуск участников", state: "done", date: "—" },
@@ -512,6 +551,10 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Дистанционная образовательная платформа Фонда: курсы по основам предпринимательства, финансовой грамотности, маркетингу и управлению бизнесом.",
       reach: [["Зарегистрировано («Іскер Аймақ»)", "5 201", "—"], ["Завершили обучение с сертификатом", "2 407", "—"], ["Пользователей online.damu.kz", "1 615", "—"], ["Завершили обучение на online.damu.kz", "982", "—"]],
+      charts: [
+        { title: "«Іскер Аймақ»: регистрация и завершение обучения", items: [["Зарегистрировано", "5 201"], ["Завершили с сертификатом", "2 407"]] },
+        { title: "online.damu.kz: пользователи и завершение обучения", items: [["Пользователей", "1 615"], ["Завершили обучение", "982"]] },
+      ],
       geo:   [["Охват", "вся РК"], ["Языки обучения", "каз / рус"], ["Платформа", "online.damu.kz (запуск 16 июля)"]],
       stages: [
         { name: "Запуск платформы online.damu.kz", state: "done", date: "16 июля" },
@@ -532,6 +575,10 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Выездные консультационные пункты для предпринимателей отдалённых и сельских районов: информирование о мерах поддержки, помощь в оформлении заявок.",
       reach: [["Оказано услуг", "7 749", "—"], ["Уникальных клиентов", "6 854", "—"], ["Проведено выездов", "337", "—"]],
+      charts: [
+        { title: "Услуги и клиенты МФО", items: [["Оказано услуг", "7 749"], ["Уникальных клиентов", "6 854"]] },
+        { title: "Территориальный охват МФО", items: [["Районов", "170"], ["Городов и моногородов", "67"], ["Регионов", "14"]] },
+      ],
       geo:   [["Регионов охвата", "14"], ["Районов охвачено", "170"], ["Городов и моногородов", "67"]],
       stages: [
         { name: "Формирование графика выездов", state: "done", date: "—" },
@@ -550,6 +597,10 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Централизованная точка приёма и сопровождения обращений предпринимателей по всем мерам поддержки Фонда: консультации, приём документов, маршрутизация заявок.",
       reach: [["Оказано услуг", "1 490", "—"], ["Уникальных клиентов", "1 373", "—"], ["Проектов доведено до одобрения БВУ", "422", "—"]],
+      charts: [
+        { title: "Услуги, клиенты и проекты ЕФО", items: [["Оказано услуг", "1 490"], ["Уникальных клиентов", "1 373"], ["Проектов доведено до одобрения БВУ", "422"]] },
+        { title: "Региональные филиалы по категориям", items: [["Крупные", "5"], ["Средние", "6"], ["Малые", "8"]] },
+      ],
       geo:   [["Региональных филиалов", "19"], ["Каналы", "офис / колл-центр / онлайн"]],
       stages: [
         { name: "Унификация стандартов обслуживания", state: "done", date: "—" },
@@ -568,6 +619,10 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Субсидирование услуг профессиональных консалтинговых компаний для действующих предпринимателей: стратегия, финансы, маркетинг, юридическое сопровождение.",
       reach: [["Проектов одобрено БВУ (2026)", "37", "—"], ["Сумма одобренных проектов (2026), млн тенге", "1 669", "—"], ["Меморандумов с компаниями", "17", "—"], ["Проектов (2025)", "115", "—"]],
+      charts: [
+        { title: "Проекты по годам", items: [["2025 г.", "115"], ["2026 г. (одобрено БВУ)", "37"]] },
+        { title: "Сумма проектов по годам, млн тенге", items: [["2025 г.", "17 336"], ["2026 г.", "1 669"]] },
+      ],
       geo:   [["Регионов охвата", "11"], ["Формат", "проектный / разовый"]],
       stages: [
         { name: "Аккредитация консультантов", state: "done", date: "—" },
@@ -585,6 +640,9 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Обучение и содействие предпринимателям в выходе на электронные торговые площадки: регистрация, продвижение товаров, логистика, аналитика продаж.",
       reach: [["Подключено предпринимателей", "526", "—"], ["Откликов на QR-опрос", "2 406", "—"], ["Оценок «отлично» / «хорошо», %", "98,4", "—"]],
+      charts: [
+        { title: "Подключено предпринимателей по площадкам", items: [["Halyk Market", "472"], ["Forte Market", "54"]] },
+      ],
       geo:   [["Площадки-партнёры", "Halyk Market, Forte Market"], ["Halyk Market", "472 предпринимателя"], ["Forte Market", "54 предпринимателя"]],
       stages: [
         { name: "Партнёрство с площадками", state: "done", date: "—" },
@@ -602,6 +660,10 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Продвижение франчайзинга как модели запуска бизнеса: каталог проверенных франшиз, консультации по выбору, сопровождение сделок между франчайзером и предпринимателем.",
       reach: [["Франшиз размещено на сайте Фонда", "13", "—"], ["Франшиз на стадии проверки", "8", "—"], ["Меморандумов и NDA", "7", "—"]],
+      charts: [
+        { title: "Франшизы в каталоге Фонда", items: [["Размещено на сайте", "13"], ["На стадии проверки", "8"]] },
+        { title: "Меморандумы и NDA", items: [["С региональными франчайзерами", "4"], ["С партнёрами", "3"]] },
+      ],
       geo:   [["Партнёры", "3"], ["Региональные франчайзеры", "4"]],
       stages: [
         { name: "Формирование каталога франшиз", state: "done", date: "—" },
@@ -619,6 +681,9 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Единый контакт-центр Фонда: приём входящих обращений предпринимателей и телефонные опросы клиентов Фонда.",
       reach: [["Входящих обращений", "31 783", "—"], ["Обзвонено клиентов", "2 984", "—"], ["Опрошено по мерам господдержки", "1 711", "—"], ["Опрошено в рамках мониторинга", "1 100", "—"], ["Опрошено клиентов РКК", "173", "—"]],
+      charts: [
+        { title: "Опрос клиентов по направлениям", items: [["Меры государственной поддержки", "1 711"], ["Мониторинг клиентов", "1 100"], ["Клиенты РКК", "173"]] },
+      ],
       geo:   [["Расположение", "г. Астана (с 01.12.2026)"]],
       stages: [
         { name: "Телефонные опросы клиентов Фонда", state: "now", date: "—" },
@@ -636,6 +701,9 @@ const DEFAULT_DATA = {
       status: "active",
       desc: "Продвижение казахстанских производителей на рынок Китая: участие в международных выставках и B2B-переговоры с китайскими производителями.",
       reach: [["Компаний — участников CIIE", "4", "—"], ["Участников онлайн-конференции (Гуандун)", "39", "—"]],
+      charts: [
+        { title: "Компании — участники CIIE по регионам", items: [["г. Алматы", "2"], ["Алматинская область", "1"], ["г. Астана", "1"]] },
+      ],
       geo:   [["Выставка", "CIIE, г. Шанхай, 5–10.11.2026"], ["Компании по регионам", "Алматы — 2, Алматинская обл. — 1, Астана — 1"]],
       stages: [
         { name: "Онлайн-конференция «Полка товаров провинции Гуандун в Центральной Азии»", state: "done", date: "20.10.2026" },
@@ -780,197 +848,276 @@ function renderSummary() {
   }).join("");
 }
 
-/* ---- Диаграмма выполнения плана ---- */
-function renderChart(p) {
-  const items = p.reach
-    .map(([label, fact, plan]) => ({ label, fact, plan, f: parseNum(fact), pl: parseNum(plan) }))
-    .filter((o) => o.f !== null && o.pl !== null && o.pl > 0);
-
-  const head = `
-    <div class="chart-title">Выполнение плана — ${esc(p.name)}</div>
-    <div class="chart-sub">Факт против плана по ключевым показателям · данные на ${esc(state.date)}</div>`;
-
-  if (!items.length) {
-    return `<div class="chart-card">${head}
-      <div class="chart-empty">Диаграмма появится, когда у показателей будут заполнены факт и план.${
-        EDIT_MODE ? " Сотрудник программы может внести их через «Редактировать»." : ""}</div></div>`;
-  }
-
-  const rows = items.map((o) => {
-    const pct = o.f / o.pl * 100;
-    const w = Math.min(pct, 100);
-    return `
-      <div class="meter">
-        <div class="meter-label">${esc(o.label)}</div>
-        <div class="meter-track" role="img" aria-label="${esc(o.label)}: ${esc(String(o.fact))} из ${esc(String(o.plan))}, ${Math.round(pct)}%"
-             title="${esc(o.label)}: факт ${esc(String(o.fact))}, план ${esc(String(o.plan))} (${Math.round(pct)}%)">
-          <div class="meter-fill${w >= 100 ? " full" : ""}" style="width:${w.toFixed(1)}%"></div>
-        </div>
-        <div class="meter-value"><span class="pct">${Math.round(pct)}%</span> · ${fmt(o.f)} <span class="plan">/ ${fmt(o.pl)}</span></div>
-      </div>`;
-  }).join("");
-
-  return `<div class="chart-card">${head}${rows}
-    <div class="chart-legend">
-      <span><span class="sw sw-fact"></span>Факт</span>
-      <span><span class="sw sw-plan"></span>План (вся шкала)</span>
-    </div></div>`;
-}
-
 /* ============================================================
-   ТЕКСТЫ ДЛЯ ЗАПРОСОВ: пресса, Холдинг, годовой отчёт, встреча с ПП
-   Собираются только из публичных данных панели. Внутренние сведения
-   (ответственные, проблемы, вопросы к Председателю) на сайт не попадают.
+   ДИАГРАММЫ-РАЗРЕЗЫ
+   В таблице: строка «Диаграмма» (B — заголовок) открывает диаграмму,
+   строки «Разрез» под ней (B — подпись, C — число) — её столбцы.
+   Порядок столбцов — как в таблице. Старые строки «Диаграмма регионов» /
+   «Регион» тоже понимаются.
    ============================================================ */
 const F = (v) => { const s = String(v ?? "").trim(); return s && s !== "—" ? s : ""; };
 const statusOf = (p) => (STATUS[p.status] || STATUS.unknown).label;
-const figs = (p) => p.reach.filter((r) => F(r[1])).map((r) => F(r[2]) ? `${r[0]} — ${r[1]} (план — ${r[2]})` : `${r[0]} — ${r[1]}`);
-const geos = (p) => p.geo.filter((r) => F(r[1])).map((r) => `${r[0]} — ${r[1]}`);
-const stagesBy = (p, st) => p.stages.filter((s) => s.state === st).map((s) => s.name + (F(s.date) ? ` (${s.date})` : ""));
-function pctOf(r) {
-  const f = parseNum(r[1]), pl = parseNum(r[2]);
-  return f !== null && pl ? Math.round(f / pl * 100) + "%" : "—";
+
+function chartsOf(p) {
+  const list = (p.charts || []).slice();
+  if ((p.regions || []).length) list.unshift({ title: p.regionsTitle || "Распределение по регионам", items: p.regions });
+  return list.map((c) => {
+    const items = (c.items || []).map(([n, v]) => ({ n, raw: v, v: parseNum(v) })).filter((o) => F(o.n) && o.v !== null);
+    return { title: F(c.title) || "Разрез", items };
+  }).filter((c) => c.items.length);
+}
+
+function renderBreakdown(p, c) {
+  const max = Math.max(...c.items.map((o) => o.v)) || 1;
+  const rows = c.items.map((o) => `
+      <div class="meter reg">
+        <div class="meter-label">${esc(o.n)}</div>
+        <div class="meter-track bare" role="img" aria-label="${esc(o.n)}: ${fmt(o.v)}" title="${esc(o.n)}: ${fmt(o.v)}">
+          <div class="meter-fill bar" style="width:${(o.v / max * 100).toFixed(1)}%"></div>
+        </div>
+        <div class="meter-value"><span class="pct">${fmt(o.v)}</span></div>
+      </div>`).join("");
+  return `<div class="chart-card">
+    <div class="chart-title">${esc(c.title)}</div>
+    <div class="chart-sub">${esc(p.name)} · данные на ${esc(state.date)}</div>
+    ${rows}</div>`;
+}
+function renderCharts(p) {
+  const cs = chartsOf(p);
+  if (!cs.length) {
+    return `<div class="chart-card"><div class="chart-title">Диаграммы</div>
+      <div class="chart-empty">Данных для диаграмм пока нет.${EDIT_MODE ? " Добавьте в таблицу строку «Диаграмма» и под ней строки «Разрез» (подпись и число)." : ""}</div></div>`;
+  }
+  return cs.map((c) => renderBreakdown(p, c)).join("");
+}
+
+/* ============================================================
+   ВЫГРУЗКА ДАННЫХ: текст (Word), таблица (Excel), презентация (PowerPoint)
+   Только публичные сведения из таблицы.
+   ============================================================ */
+const figs = (p) => p.reach.filter((r) => F(r[1])).map((r) => `${r[0]} — ${r[1]}`);
+const BRAND = { pine: "1E4634", green: "2E7D4F", lime: "7CB342", ink: "20241F", muted: "6B7268", paper: "F7F8F5", line: "E0E4DD", mint: "EAF4EC" };
+const DOC_TITLE = "Программы нефинансовой поддержки Фонда «Даму»";
+
+function tableRows(ps, single) {
+  const rows = [];
+  ps.forEach(({ p, n }) => {
+    const own = [["Статус", "", statusOf(p)]];
+    p.reach.forEach((r) => own.push(["Охват и участники", r[0], r[1]]));
+    p.geo.forEach((r) => own.push(["География", r[0], r[1]]));
+    chartsOf(p).forEach((c) => c.items.forEach((o) => own.push([c.title, o.n, o.raw])));
+    own.forEach((r, k) => rows.push(single ? r : [k === 0 ? String(n) : "", k === 0 ? p.name : "", ...r]));
+  });
+  return { head: single ? ["Раздел", "Показатель", "Значение"] : ["№", "Программа", "Раздел", "Показатель", "Значение"], rows };
 }
 
 const FORMATS = {
-  press: {
-    label: "Пресса / интервью",
-    title: "Статус программ нефинансовой поддержки — для СМИ и интервью",
+  text: {
+    label: "Данные в тексте",
+    hint: "Готовый текст для письма, справки, пресс-релиза или интервью. Копируется в Word с форматированием.",
     build(ps) {
-      const auto = ps.filter(({ p }) => !F(p.press)).length;
       return {
         type: "blocks",
-        blocks: ps.map(({ p }) => ({
-          h: p.name,
-          paras: F(p.press) ? [p.press] : [
+        blocks: ps.map(({ p, n }) => ({
+          h: (ps.length > 1 ? n + ". " : "") + p.name,
+          paras: [
             F(p.desc),
             `Статус: ${statusOf(p).toLowerCase()}.`,
             figs(p).length ? `Ключевые показатели на ${state.date}: ${figs(p).join("; ")}.` : "",
-            F(p.conclusion),
           ].filter(Boolean),
+          list: (p.progress || []).filter(F),
+          after: F(p.conclusion),
         })),
-        notes: auto && EDIT_MODE ? [`Текст собран автоматически из описания, статуса и цифр (${auto} из ${ps.length}). Свою формулировку можно задать строкой «Для прессы» в таблице.`] : [],
       };
     },
   },
-  holding: {
-    label: "Отчёт в Холдинг",
-    title: "Выполнение показателей программ нефинансовой поддержки — отчёт в Холдинг",
-    build(ps, single) {
-      const rows = [];
-      ps.forEach(({ p }) => {
-        const reach = p.reach.length ? p.reach : [["—", "—", "—"]];
-        reach.forEach((r, k) => {
-          const row = [r[0], r[1], r[2] ?? "—", pctOf(r)];
-          rows.push(single ? row : [k === 0 ? p.name : "", k === 0 ? statusOf(p) : "", ...row]);
-        });
-      });
-      return {
-        type: "table",
-        head: single ? ["Показатель", "Факт", "План", "Выполнение"] : ["Программа", "Статус", "Показатель", "Факт", "План", "Выполнение"],
-        rows,
-        notes: [],
-      };
-    },
+  table: {
+    label: "Данные в таблице",
+    hint: "Все показатели одной таблицей: статус, охват, география и разрезы. Вставляется в Excel или Word, скачивается в .xlsx.",
+    build(ps, single) { return { type: "table", ...tableRows(ps, single) }; },
   },
-  annual: {
-    label: "Годовой отчёт",
-    title: "Итоги реализации программ нефинансовой поддержки — для годового отчёта",
-    build(ps) {
-      const empty = ps.filter(({ p }) => !F(p.annual)).length;
-      return {
-        type: "blocks",
-        blocks: ps.map(({ p }) => ({
-          h: p.name,
-          paras: [F(p.annual) || F(p.desc)].filter(Boolean),
-          list: [...figs(p), ...geos(p)],
-        })),
-        notes: empty && EDIT_MODE ? [`Итоги года не заполнены у ${empty} из ${ps.length} программ — вместо них стоит описание. Заполните строку «Итоги года» в таблице.`] : [],
-      };
-    },
-  },
-  pp: {
-    label: "Встреча с ПП",
-    title: "Краткая справка к статусной встрече с Председателем Правления",
-    build(ps) {
-      /* Формат повторяет справку департамента: № | Направление / проект | Ответств. | Статус на дату.
-         Статус — пункты «Ход реализации»; если их нет — цифры и текущий этап. */
-      const fallback = (p) => [
-        ...figs(p),
-        ...stagesBy(p, "now").map((s) => "В работе: " + s),
-        ...stagesBy(p, "next").map((s) => "Далее: " + s),
-      ];
-      const empty = ps.filter(({ p }) => !(p.progress || []).some(F)).length;
-      return {
-        type: "table",
-        bullets: true,
-        heading: [
-          "КРАТКАЯ СПРАВКА",
-          "к статусной встрече с Председателем Правления АО «Фонд развития предпринимательства «Даму»",
-          `по состоянию на ${state.date}`,
-        ],
-        lead: "Вопросы, требующие решения Председателя: _____________________",
-        head: ["№", "Направление / проект", "Ответств.", `Статус на ${state.date}`],
-        widths: ["4%", "22%", "11%", "63%"],
-        rows: ps.map(({ p, n }) => {
-          const items = (p.progress || []).filter(F);
-          return [String(n), p.name, "", items.length ? items : fallback(p)];
-        }),
-        notes: [
-          "Колонка «Ответств.» и вопросы, требующие решения Председателя, на сайте не публикуются — заполните их в Word после вставки.",
-          ...(empty && EDIT_MODE ? [`«Ход реализации» не заполнен у ${empty} из ${ps.length} программ — вместо него показаны цифры и этапы.`] : []),
-        ],
-        warn: true,
-      };
-    },
+  slides: {
+    label: "Данные в презентации",
+    hint: "Слайды в зелёных цветах Фонда: титульный, сводный и по слайду на программу с ключевыми цифрами и диаграммой.",
+    build(ps) { return { type: "slides", ps }; },
   },
 };
 
-const BRIEF_KEY = "damu-brief-format";
-let briefFmt = (() => { try { return localStorage.getItem(BRIEF_KEY) || "press"; } catch { return "press"; } })();
+const BRIEF_KEY = "damu-export-format";
+let briefFmt = (() => { try { return localStorage.getItem(BRIEF_KEY) || "text"; } catch { return "text"; } })();
 
 const FONT = "font-family:Calibri,Arial,sans-serif;";
 function briefHTML(m, title) {
-  const cell = (c) => {
-    if (!Array.isArray(c)) return esc(F(c) || (c === "" ? "" : "—"));
-    if (!c.length) return "—";
-    return m.bullets
-      ? `<ul style="margin:0 0 0 16px;padding:0">${c.map((x) => `<li style="margin:0 0 3px">${esc(x)}</li>`).join("")}</ul>`
-      : c.map(esc).join("<br>");
-  };
-  const TH = (k) => `style="${FONT}font-size:10pt;border:1px solid #8A9386;background:#1E4634;color:#fff;padding:4px 6px;text-align:center;vertical-align:middle${m.widths ? ";width:" + m.widths[k] : ""}"`;
-  const TD = `style="${FONT}font-size:10pt;border:1px solid #8A9386;padding:4px 6px;vertical-align:top"`;
   const P = (inner, extra = "") => `<p style="${FONT}font-size:11pt;margin:0 0 6px;${extra}">${inner}</p>`;
-  let h = m.heading
-    ? m.heading.map((x, k) => P(k === 0 ? `<b>${esc(x)}</b>` : k === 1 ? `<b>${esc(x)}</b>` : `<i>${esc(x)}</i>`,
-        "text-align:center;" + (k === 0 ? "font-size:13pt;margin:0" : k === 1 ? "margin:0" : "margin:0 0 12px"))).join("")
-    : P(`<b>${esc(title)}</b>`, "font-size:12pt") + P(`Данные на ${esc(state.date)} · Фонд «Даму»`, "color:#666;font-size:9.5pt;margin-bottom:12px");
-  if (m.lead) h += P(`<b>${esc(m.lead)}</b>`, "margin-bottom:10px");
+  let h = P(`<b>${esc(title)}</b>`, "font-size:13pt") + P(`Данные на ${esc(state.date)} · Фонд «Даму»`, "color:#666;font-size:9.5pt;margin-bottom:12px");
   if (m.type === "table") {
-    h += `<table style="border-collapse:collapse;width:100%"><thead><tr>${m.head.map((x, k) => `<th ${TH(k)}>${esc(x)}</th>`).join("")}</tr></thead>` +
-         `<tbody>${m.rows.map((r) => `<tr>${r.map((c) => `<td ${TD}>${cell(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    const TH = `style="${FONT}font-size:10pt;border:1px solid #8A9386;background:#1E4634;color:#fff;padding:4px 6px;text-align:left"`;
+    const TD = `style="${FONT}font-size:10pt;border:1px solid #8A9386;padding:4px 6px;vertical-align:top"`;
+    h += `<table style="border-collapse:collapse;width:100%"><thead><tr>${m.head.map((x) => `<th ${TH}>${esc(x)}</th>`).join("")}</tr></thead>` +
+         `<tbody>${m.rows.map((r) => `<tr>${r.map((c) => `<td ${TD}>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
   } else {
-    h += m.blocks.map((b) => P(`<b>${esc(b.h)}</b>`, "margin-top:10px") +
+    h += m.blocks.map((b) => P(`<b>${esc(b.h)}</b>`, "margin-top:12px;color:#1E4634") +
       b.paras.map((x) => P(esc(x))).join("") +
-      (b.list && b.list.length ? `<ul style="${FONT}font-size:11pt;margin:0 0 6px 18px;padding:0">${b.list.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : "")).join("");
+      (b.list.length ? `<ul style="${FONT}font-size:11pt;margin:0 0 6px 18px;padding:0">${b.list.map((x) => `<li style="margin-bottom:3px">${esc(x)}</li>`).join("")}</ul>` : "") +
+      (b.after ? P(`<i>${esc(b.after)}</i>`) : "")).join("");
   }
   return h;
 }
 function briefText(m, title) {
-  const cell = (c) => Array.isArray(c) ? (c.join(m.bullets ? " • " : "; ") || "—") : (F(c) || (c === "" ? "" : "—"));
-  const out = m.heading ? [...m.heading, ""] : [title, `Данные на ${state.date} · Фонд «Даму»`, ""];
-  if (m.lead) out.push(m.lead, "");
+  const out = [title, `Данные на ${state.date} · Фонд «Даму»`, ""];
   if (m.type === "table") {
     out.push(m.head.join("\t"));
-    m.rows.forEach((r) => out.push(r.map(cell).join("\t")));
+    m.rows.forEach((r) => out.push(r.join("\t")));
   } else {
     m.blocks.forEach((b) => {
       out.push(b.h, ...b.paras);
-      (b.list || []).forEach((x) => out.push("• " + x));
+      b.list.forEach((x) => out.push("• " + x));
+      if (b.after) out.push(b.after);
       out.push("");
     });
   }
   return out.join("\n").trim();
+}
+
+/* ---- Предпросмотр слайдов (то же, что попадёт в .pptx) ---- */
+function slidePlan(ps) {
+  const slides = [{ kind: "title" }];
+  if (ps.length > 1) slides.push({ kind: "overview" });
+  ps.forEach(({ p, n }) => {
+    const cs = chartsOf(p);
+    slides.push({ kind: "program", p, n, chart: cs[0] || null });
+    cs.slice(1).forEach((c) => slides.push({ kind: "chart", p, n, chart: c }));
+  });
+  return slides;
+}
+function previewSlides(ps) {
+  const single = ps.length === 1;
+  const bars = (c) => {
+    const max = Math.max(...c.items.map((o) => o.v)) || 1;
+    return `<div class="sl-chart"><div class="sl-ct">${esc(c.title)}</div>${c.items.slice(0, 8).map((o) =>
+      `<div class="sl-bar"><span>${esc(o.n)}</span><i style="width:${(o.v / max * 100).toFixed(0)}%"></i><b>${fmt(o.v)}</b></div>`).join("")}</div>`;
+  };
+  return `<div class="slides">${slidePlan(ps).map((s) => {
+    if (s.kind === "title") return `<div class="slide sl-cover"><div class="sl-acc"></div>
+      <div class="sl-big">${esc(single ? ps[0].p.name : DOC_TITLE)}</div>
+      <div class="sl-sub">Статус реализации · данные на ${esc(state.date)}</div><div class="sl-org">Фонд развития предпринимательства «Даму»</div></div>`;
+    if (s.kind === "overview") return `<div class="slide"><div class="sl-head">Портфель программ</div><div class="sl-body">
+      <table class="sl-tbl">${ps.map(({ p, n }) => `<tr><td>${n}</td><td>${esc(p.name)}</td><td>${esc(statusOf(p))}</td><td>${esc(figs(p)[0] || "—")}</td></tr>`).join("")}</table></div></div>`;
+    const p = s.p;
+    if (s.kind === "chart") return `<div class="slide"><div class="sl-head">${esc(p.name)}</div><div class="sl-body">${bars(s.chart)}</div></div>`;
+    const tiles = p.reach.filter((r) => F(r[1])).slice(0, 4);
+    const pts = (p.progress || []).filter(F).slice(0, 4);
+    return `<div class="slide"><div class="sl-head">${esc(p.name)}<span class="sl-chip">${esc(statusOf(p))}</span></div><div class="sl-body">
+      ${tiles.length ? `<div class="sl-tiles">${tiles.map((r) => `<div class="sl-tile"><b>${esc(r[1])}</b><span>${esc(r[0])}</span></div>`).join("")}</div>` : ""}
+      <div class="sl-cols"><div class="sl-pts">${pts.length ? `<ul>${pts.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p.desc)}</p>`}</div>
+      ${s.chart ? bars(s.chart) : ""}</div></div></div>`;
+  }).join("")}</div>`;
+}
+
+/* ---- Загрузка библиотек по требованию ---- */
+const libs = {};
+function loadLib(src, name) {
+  if (window[name]) return Promise.resolve(window[name]);
+  if (libs[src]) return libs[src];
+  libs[src] = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = () => (window[name] ? resolve(window[name]) : reject(new Error(name)));
+    s.onerror = () => { delete libs[src]; reject(new Error(name)); };
+    document.head.appendChild(s);
+  });
+  return libs[src];
+}
+
+/* ---- PowerPoint ---- */
+async function downloadPptx(ps, filename) {
+  const Pptx = await loadLib("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js", "PptxGenJS");
+  const pptx = new Pptx();
+  pptx.layout = "LAYOUT_WIDE";   // 13,33 × 7,5 дюйма
+  pptx.title = DOC_TITLE;
+  pptx.company = "Фонд «Даму»";
+  const FONT_FACE = "Calibri";
+  const B = BRAND;
+  pptx.defineSlideMaster({
+    title: "DAMU",
+    background: { color: "FFFFFF" },
+    objects: [
+      { rect: { x: 0, y: 0, w: 13.33, h: 0.95, fill: { color: B.pine } } },
+      { rect: { x: 0, y: 0.95, w: 13.33, h: 0.06, fill: { color: B.lime } } },
+      { text: { text: `Фонд «Даму» · данные на ${state.date}`, options: { x: 0.5, y: 7.05, w: 8, h: 0.3, fontFace: FONT_FACE, fontSize: 9, color: B.muted } } },
+    ],
+    slideNumber: { x: 12.4, y: 7.05, w: 0.5, h: 0.3, fontFace: FONT_FACE, fontSize: 9, color: B.muted },
+  });
+  const head = (s, text, chip) => {
+    s.addText(text, { x: 0.5, y: 0.12, w: chip ? 9.6 : 12.3, h: 0.72, fontFace: FONT_FACE, fontSize: 24, bold: true, color: "FFFFFF", valign: "middle", fit: "shrink" });
+    if (chip) s.addText(chip, { x: 10.4, y: 0.27, w: 2.45, h: 0.42, fontFace: FONT_FACE, fontSize: 12, bold: true, color: B.pine, align: "center", valign: "middle", shape: pptx.ShapeType.roundRect, rectRadius: 0.2, fill: { color: B.mint } });
+  };
+  const chartAt = (s, c, x, y, w, h) => {
+    s.addText(c.title, { x, y, w, h: 0.4, fontFace: FONT_FACE, fontSize: 14, bold: true, color: B.ink });
+    s.addChart(pptx.ChartType.bar, [{ name: c.title, labels: c.items.map((o) => o.n), values: c.items.map((o) => o.v) }], {
+      x, y: y + 0.4, w, h: h - 0.4, barDir: "bar", barGapWidthPct: c.items.length <= 3 ? 160 : 50, chartColors: [B.pine],
+      catAxisOrientation: "maxMin", catAxisLabelFontFace: FONT_FACE, catAxisLabelFontSize: 11, catAxisLabelColor: B.ink,
+      catAxisLineShow: false, valAxisHidden: true, valGridLine: { style: "none" },
+      showValue: true, dataLabelPosition: "outEnd", dataLabelFontFace: FONT_FACE, dataLabelFontSize: 11, dataLabelColor: B.ink, dataLabelFormatCode: "# ##0",
+      showLegend: false,
+    });
+  };
+  const single = ps.length === 1;
+  slidePlan(ps).forEach((sp) => {
+    if (sp.kind === "title") {
+      const s = pptx.addSlide();
+      s.background = { color: B.pine };
+      s.addShape(pptx.ShapeType.rect, { x: 0.8, y: 2.35, w: 0.12, h: 2.2, fill: { color: B.lime }, line: { color: B.lime } });
+      s.addText(single ? ps[0].p.name : DOC_TITLE, { x: 1.2, y: 2.2, w: 11, h: 1.6, fontFace: FONT_FACE, fontSize: 36, bold: true, color: "FFFFFF", valign: "top", fit: "shrink" });
+      s.addText(`Статус реализации · данные на ${state.date}`, { x: 1.2, y: 3.85, w: 11, h: 0.5, fontFace: FONT_FACE, fontSize: 18, color: "C9E3B0" });
+      s.addText("Фонд развития предпринимательства «Даму»", { x: 1.2, y: 6.5, w: 11, h: 0.4, fontFace: FONT_FACE, fontSize: 12, color: "C9CFC4" });
+      return;
+    }
+    const s = pptx.addSlide({ masterName: "DAMU" });
+    if (sp.kind === "overview") {
+      head(s, "Портфель программ");
+      const hdr = ["№", "Программа", "Статус", "Ключевой показатель"].map((t) => ({ text: t, options: { bold: true, color: "FFFFFF", fill: { color: B.pine } } }));
+      const body = ps.map(({ p, n }, k) => [String(n), p.name, statusOf(p), figs(p)[0] || "—"].map((t) => ({ text: t, options: { fill: { color: k % 2 ? "FFFFFF" : B.paper } } })));
+      s.addTable([hdr, ...body], { x: 0.5, y: 1.3, w: 12.3, colW: [0.6, 4.4, 2.0, 5.3], fontFace: FONT_FACE, fontSize: 11, color: B.ink, border: { type: "solid", pt: 0.5, color: B.line }, valign: "middle", rowH: 0.42 });
+      return;
+    }
+    const p = sp.p;
+    if (sp.kind === "chart") { head(s, p.name); chartAt(s, sp.chart, 0.8, 1.35, 11.7, 5.4); return; }
+    head(s, p.name, statusOf(p));
+    const tiles = p.reach.filter((r) => F(r[1])).slice(0, 4);
+    let y = 1.3;
+    if (tiles.length) {
+      const gap = 0.25, tw = (12.3 - gap * (tiles.length - 1)) / tiles.length;
+      tiles.forEach((r, k) => {
+        const x = 0.5 + k * (tw + gap);
+        s.addShape(pptx.ShapeType.rect, { x, y, w: tw, h: 1.25, fill: { color: B.paper }, line: { color: B.line, width: 0.75 } });
+        s.addShape(pptx.ShapeType.rect, { x, y, w: tw, h: 0.07, fill: { color: k === 0 ? B.lime : B.pine }, line: { color: k === 0 ? B.lime : B.pine } });
+        s.addText(String(r[1]), { x: x + 0.2, y: y + 0.15, w: tw - 0.4, h: 0.6, fontFace: FONT_FACE, fontSize: 28, bold: true, color: B.pine, fit: "shrink" });
+        s.addText(r[0], { x: x + 0.2, y: y + 0.75, w: tw - 0.4, h: 0.42, fontFace: FONT_FACE, fontSize: 11, color: B.muted, valign: "top", fit: "shrink" });
+      });
+      y += 1.5;
+    }
+    const pts = (p.progress || []).filter(F).slice(0, 5);
+    const left = { x: 0.5, y, w: sp.chart ? 6.0 : 12.3, h: 6.85 - y };
+    s.addText(pts.length ? "Ход реализации" : "О программе", { x: left.x, y: left.y, w: left.w, h: 0.4, fontFace: FONT_FACE, fontSize: 14, bold: true, color: B.ink });
+    s.addText(pts.length ? pts.map((t) => ({ text: t, options: { bullet: { code: "25A0" }, breakLine: true, paraSpaceAfter: 6 } }))
+                         : [{ text: p.desc || "—" }, ...(F(p.conclusion) ? [{ text: "\n" + p.conclusion, options: { italic: true, color: B.green } }] : [])],
+      { x: left.x, y: left.y + 0.45, w: left.w, h: left.h - 0.45, fontFace: FONT_FACE, fontSize: 12, color: B.ink, valign: "top", fit: "shrink" });
+    if (sp.chart) chartAt(s, sp.chart, 6.85, y, 5.95, 6.85 - y);
+  });
+  await pptx.writeFile({ fileName: filename });
+}
+
+/* ---- Excel ---- */
+async function downloadXlsx(m, title, filename) {
+  const X = await loadXlsxLib();
+  const num = (v) => /^-?\d[\d\s ]*([.,]\d+)?$/.test(String(v).trim()) ? parseNum(v) : v;
+  const aoa = [[title], [`Данные на ${state.date} · Фонд «Даму»`], [], m.head, ...m.rows.map((r) => r.map(num))];
+  const ws = X.utils.aoa_to_sheet(aoa);
+  ws["!cols"] = m.head.map((h) => ({ wch: h === "№" ? 5 : h === "Значение" ? 16 : h === "Программа" ? 34 : 36 }));
+  const wb = X.utils.book_new();
+  X.utils.book_append_sheet(wb, ws, "Данные");
+  X.writeFile(wb, filename);
 }
 
 async function copyRich(html, text) {
@@ -1003,24 +1150,28 @@ function downloadDoc(html, filename) {
 
 function renderBrief(el, idxs) {
   if (!el) return;
-  const fmt = FORMATS[briefFmt] ? briefFmt : "press";
+  const fmtKey = FORMATS[briefFmt] ? briefFmt : "text";
   const single = idxs.length === 1;
   const ps = idxs.map((i) => ({ p: state.programs[i], n: i + 1 }));
-  const m = FORMATS[fmt].build(ps, single);
-  const title = FORMATS[fmt].title + (single ? " — " + ps[0].p.name : "");
-  const html = briefHTML(m, title), text = briefText(m, title);
+  const m = FORMATS[fmtKey].build(ps, single);
+  const title = single ? ps[0].p.name : DOC_TITLE;
+  const base = ((single ? ps[0].p.name : "Даму_программы") + "_" + String(state.date).replace(/[^\d.]/g, ""))
+    .replace(/[\\/:*?"<>|«»]/g, "").replace(/\s+/g, "_");
+  const isSlides = m.type === "slides";
+  const html = isSlides ? "" : briefHTML(m, title);
+  const actions = isSlides
+    ? `<button class="btn primary" type="button" data-act="pptx">Скачать PowerPoint (.pptx)</button>`
+    : `<button class="btn primary" type="button" data-act="copy">Скопировать</button>` +
+      (m.type === "table" ? `<button class="btn" type="button" data-act="xlsx">Скачать Excel (.xlsx)</button>`
+                          : `<button class="btn" type="button" data-act="doc">Скачать для Word</button>`);
   el.innerHTML = `
     <div class="brief">
-      <div class="chart-title">${single ? "Текст для запроса" : "Сводная справка по всем программам"}</div>
-      <div class="chart-sub">Выберите, для чего нужен текст, и скопируйте его в Word, письмо или презентацию</div>
+      <div class="chart-title">${single ? "Выгрузка данных по программе" : "Выгрузка данных по всем программам"}</div>
+      <div class="chart-sub">${esc(FORMATS[fmtKey].hint)}</div>
       <div class="tabs" role="tablist">${Object.entries(FORMATS).map(([k, v]) =>
-        `<button class="tab" role="tab" type="button" data-fmt="${k}" aria-selected="${k === fmt}">${v.label}</button>`).join("")}</div>
-      <div class="brief-preview">${html}</div>
-      ${m.notes.map((n) => `<div class="brief-note${m.warn ? " warn" : ""}">${esc(n)}</div>`).join("")}
-      <div class="brief-actions">
-        <button class="btn primary" type="button" data-act="copy">Скопировать текст</button>
-        <button class="btn" type="button" data-act="doc">Скачать для Word</button>
-      </div>
+        `<button class="tab" role="tab" type="button" data-fmt="${k}" aria-selected="${k === fmtKey}">${v.label}</button>`).join("")}</div>
+      <div class="brief-preview${isSlides ? " is-slides" : ""}">${isSlides ? previewSlides(ps) : html}</div>
+      <div class="brief-actions">${actions}</div>
     </div>`;
   el.querySelectorAll(".tab").forEach((b) => {
     b.onclick = () => {
@@ -1029,13 +1180,21 @@ function renderBrief(el, idxs) {
       renderBrief(el, idxs);
     };
   });
-  el.querySelector('[data-act="copy"]').onclick = async () => {
-    toast(await copyRich(html, text) ? "Скопировано — вставьте в Word или письмо (Ctrl+V)" : "Не удалось скопировать — выделите текст в окне вручную");
-  };
-  el.querySelector('[data-act="doc"]').onclick = () => {
-    const name = (single ? ps[0].p.name + "_" : "Справка_") + FORMATS[fmt].label + "_" + String(state.date).replace(/[^\d.]/g, "") + ".doc";
-    downloadDoc(html, name.replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, "_"));
-  };
+  const act = (name, fn) => { const b = el.querySelector(`[data-act="${name}"]`); if (b) b.onclick = fn; };
+  act("copy", async () => {
+    toast(await copyRich(html, briefText(m, title)) ? "Скопировано — вставьте в Word, Excel или письмо (Ctrl+V)" : "Не удалось скопировать — выделите текст вручную");
+  });
+  act("doc", () => downloadDoc(html, base + ".doc"));
+  act("xlsx", async () => {
+    try { await downloadXlsx(m, title, base + ".xlsx"); toast("Файл Excel скачан"); }
+    catch { toast("Не удалось сформировать Excel — проверьте интернет и повторите"); }
+  });
+  act("pptx", async (e) => {
+    const btn = e.currentTarget; btn.disabled = true; btn.textContent = "Готовлю презентацию…";
+    try { await downloadPptx(ps, base + ".pptx"); toast("Презентация скачана"); }
+    catch { toast("Не удалось сформировать презентацию — проверьте интернет и повторите"); }
+    finally { btn.disabled = false; btn.textContent = "Скачать PowerPoint (.pptx)"; }
+  });
 }
 
 /* ---- Карточка программы ---- */
@@ -1069,7 +1228,7 @@ function renderProgram(i) {
         </div>
       </div>
     </div>
-    ${renderChart(p)}
+    ${renderCharts(p)}
     <div class="conclusion"><div class="lbl">Вывод</div>${esc(p.conclusion)}</div>
     <div id="program-brief"></div>
   `;
@@ -1122,13 +1281,9 @@ function openProgramEditor(i) {
       <h4>Вывод для совещаний</h4>
       <div class="field"><textarea id="ed-conclusion">${esc(p.conclusion)}</textarea></div>
 
-      <h4>Тексты для запросов (только публичные сведения)</h4>
-      <div class="field"><label>Ход реализации — для справки к встрече с ПП, по одному пункту на строку</label>
+      <h4>Ход реализации (только публичные сведения)</h4>
+      <div class="field"><label>По одному пункту на строку</label>
         <textarea id="ed-progress" style="min-height:110px">${esc((p.progress || []).join("\n"))}</textarea></div>
-      <div class="field"><label>Для прессы и интервью — если пусто, текст собирается из описания и цифр</label>
-        <textarea id="ed-press">${esc(p.press || "")}</textarea></div>
-      <div class="field"><label>Итоги года — для годового отчёта</label>
-        <textarea id="ed-annual">${esc(p.annual || "")}</textarea></div>
 
       <div class="editor-actions">
         <button class="btn primary" id="ed-save" type="button">Сохранить</button>
@@ -1185,8 +1340,6 @@ function openProgramEditor(i) {
       date: r.querySelector(".es-date").value.trim() || "—",
     })).filter((s) => s.name);
     np.conclusion = $("ed-conclusion").value.trim();
-    np.press = $("ed-press").value.trim();
-    np.annual = $("ed-annual").value.trim();
     np.progress = $("ed-progress").value.split("\n").map((s) => s.trim()).filter(Boolean);
     state.programs[i] = np;
     saveState();
@@ -1398,7 +1551,7 @@ function parseWorkbook(wb, X) {
     }
     const m = sheetName.match(/^\s*(\d{1,2})\s*(.*)$/);
     if (!m) return;
-    const p = { name: m[2].trim() || sheetName, status: "unknown", desc: "", reach: [], geo: [], stages: [], conclusion: "", press: "", annual: "", progress: [] };
+    const p = { name: m[2].trim() || sheetName, status: "unknown", desc: "", reach: [], geo: [], stages: [], conclusion: "", progress: [], charts: [] };
     rows.forEach((r) => {
       const sec = norm(r[0]);
       const b = cellText(r[1]), c = cellText(r[2]), d = cellText(r[3]);
@@ -1409,9 +1562,12 @@ function parseWorkbook(wb, X) {
       else if (sec === "география" && b) p.geo.push([b, dash(c)]);
       else if (sec === "этап" && b) p.stages.push({ name: b, state: STAGE_IN[norm(c)] || "next", date: dash(d) });
       else if (sec === "вывод") p.conclusion = b;
-      else if (sec === "для прессы") p.press = b;
-      else if (sec === "итоги года") p.annual = b;
       else if (sec === "ход реализации" && b) p.progress.push(b);
+      else if ((sec === "диаграмма" || sec === "диаграмма регионов") && b) p.charts.push({ title: b, items: [] });
+      else if ((sec === "разрез" || sec === "регион") && b) {
+        if (!p.charts.length) p.charts.push({ title: "", items: [] });
+        p.charts[p.charts.length - 1].items.push([b, dash(c)]);
+      }
     });
     progs.push({ n: +m[1], p });
   });
