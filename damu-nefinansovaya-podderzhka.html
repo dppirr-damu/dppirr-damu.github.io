@@ -836,11 +836,31 @@ $("btn-edit-overview").onclick = () => {
 };
 
 /* ---- Экспорт / импорт ---- */
-$("btn-export").onclick = () => {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+/* В просмотрщике Claude скачивание идёт через capability `downloads`;
+   в обычном браузере и на GitHub Pages — через ссылку, как раньше. */
+let claudeDownloads = null;
+if (window.claude && typeof window.claude.use === "function") {
+  window.claude.use("downloads").then((d) => { claudeDownloads = d; }).catch(() => {});
+}
+$("btn-export").onclick = async () => {
+  const json = JSON.stringify(state, null, 2);
+  const filename = "damu-data-" + new Date().toISOString().slice(0, 10) + ".json";
+  if (claudeDownloads) {
+    try {
+      await claudeDownloads.save({ filename, data: json });
+      toast("Файл данных скачан — отправьте его ответственному за панель");
+    } catch (err) {
+      const code = err && err.code;
+      if (code === "declined") toast("Скачивание отменено");
+      else if (code === "rate_limited") toast("Подтвердите открытое окно сохранения или повторите через минуту");
+      else toast("Скачивание недоступно в этом окне — откройте панель на GitHub Pages");
+    }
+    return;
+  }
+  const blob = new Blob([json], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "damu-data-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.download = filename;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   toast("Файл данных скачан — отправьте его ответственному за панель");
