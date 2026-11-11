@@ -2,15 +2,1148 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=damu-nefinansovaya-podderzhka.html">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Фонд «Даму» — Пульт нефинансовой поддержки</title>
+<meta name="description" content="Статус 8 программ нефинансовой поддержки предпринимателей: охват, география, этапы, диаграммы факт/план. Обновляется еженедельно.">
 <meta property="og:title" content="Фонд «Даму» — Пульт нефинансовой поддержки">
 <meta property="og:description" content="Статус 8 программ нефинансовой поддержки: показатели, география, этапы и диаграммы. Актуальные данные для совещаний и презентаций.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #20241F;
+    --side: #20241F;
+    --side-hover: #2B3129;
+    --side-text: #C9CFC4;
+    --side-dim: #7E8578;
+    --pine: #1E4634;
+    --paper: #F7F8F5;
+    --card: #FFFFFF;
+    --line: #E0E4DD;
+    --muted: #6B7268;
+    --lime: #7CB342;
+    --green: #2E7D4F;
+    --green-bg: #EAF4EC;
+    --amber: #C77800;
+    --amber-bg: #FBF3E4;
+    --grey: #5F6659;
+    --grey-bg: #EFF1EC;
+    --track: #E9EDE4;
+    --radius: 10px;
+    --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .num, .kpi-value, td.v, .stat-value, .meter-value { font-feature-settings: "tnum" 1; font-variant-numeric: tabular-nums; }
+
+  .app { display: flex; min-height: 100vh; }
+
+  /* ================= Sidebar ================= */
+  .side {
+    width: 248px; flex-shrink: 0;
+    background: var(--side); color: var(--side-text);
+    display: flex; flex-direction: column;
+    position: fixed; inset: 0 auto 0 0; z-index: 40;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    padding: 20px 20px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .brand-mark {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: var(--lime); color: var(--ink);
+    font-family: var(--font-display); font-weight: 800; font-size: 19px;
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .brand-name { font-weight: 700; font-size: 14.5px; color: #fff; letter-spacing: .1px; }
+  .brand-sub { font-size: 11.5px; color: var(--side-dim); margin-top: 1px; }
+
+  .nav { flex: 1; overflow-y: auto; padding: 12px 10px; }
+  .nav-label { font-size: 11px; font-weight: 600; color: var(--side-dim); padding: 10px 10px 6px; }
+  .nav-item {
+    display: flex; align-items: baseline; gap: 10px;
+    width: 100%; text-align: left;
+    background: none; border: none; cursor: pointer;
+    color: var(--side-text); font: inherit; font-size: 13.5px;
+    padding: 8px 10px; border-radius: 7px;
+    border-left: 3px solid transparent;
+    transition: background .12s ease;
+  }
+  .nav-item:hover { background: var(--side-hover); }
+  .nav-item .idx { font-size: 11px; color: var(--side-dim); font-feature-settings: "tnum" 1; min-width: 18px; }
+  .nav-item.active { background: var(--side-hover); color: #fff; border-left-color: var(--lime); font-weight: 600; }
+  .nav-item.active .idx { color: var(--lime); }
+  .nav-divider { height: 1px; background: rgba(255,255,255,.08); margin: 10px 4px; }
+
+  .side-foot {
+    padding: 14px 20px 18px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    font-size: 12px; color: var(--side-dim);
+  }
+  .side-foot .upd-date { color: #fff; font-weight: 600; font-size: 13.5px; font-feature-settings: "tnum" 1; margin-top: 1px; }
+
+  /* ================= Main ================= */
+  .main { flex: 1; margin-left: 248px; min-width: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--card); border-bottom: 1px solid var(--line);
+    padding: 0 28px; height: 60px;
+  }
+  .topbar h1 {
+    font-family: var(--font-display);
+    font-size: 17px; font-weight: 700; letter-spacing: .1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .top-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .date-chip {
+    font-size: 12px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 20px; padding: 4px 12px;
+    background: var(--paper); white-space: nowrap;
+  }
+  .date-chip b { color: var(--ink); font-feature-settings: "tnum" 1; }
+
+  .btn {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    font: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink);
+    padding: 6px 13px; cursor: pointer; white-space: nowrap;
+    transition: border-color .12s ease, background .12s ease;
+  }
+  .btn:hover { border-color: var(--lime); }
+  .btn.primary { background: var(--pine); border-color: var(--pine); color: #fff; }
+  .btn.primary:hover { background: #265A43; }
+  .btn.danger { color: #A33B2A; }
+  .btn.small { font-size: 12px; padding: 4px 10px; }
+
+  .burger {
+    display: none;
+    background: none; border: 1px solid var(--line); border-radius: 8px;
+    width: 36px; height: 36px; font-size: 18px; cursor: pointer; color: var(--ink);
+    flex-shrink: 0;
+  }
+
+  .content { padding: 28px; max-width: 1060px; width: 100%; }
+  .view[hidden] { display: none; }
+
+  /* ================= KPI ================= */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .kpi {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px 14px;
+    border-top: 3px solid var(--pine);
+  }
+  .kpi.accent { border-top-color: var(--lime); }
+  .kpi-value { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--ink); line-height: 1.15; }
+  .kpi-label { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 15px; font-weight: 700; color: var(--ink);
+    margin: 26px 0 12px;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .section-title .hint { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .section-title .btn { margin-left: auto; }
+
+  /* ================= Summary table ================= */
+  .table-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 11px 16px; text-align: left; font-size: 13px; border-bottom: 1px solid var(--line); }
+  th { font-size: 11.5px; font-weight: 600; color: var(--muted); background: var(--paper); border-bottom: 1px solid var(--line); }
+  tbody tr { cursor: pointer; transition: background .1s ease; }
+  tbody tr:hover { background: #F2F5EF; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.idx { color: var(--muted); font-feature-settings: "tnum" 1; width: 34px; }
+  td.v { white-space: nowrap; }
+
+  /* ================= Status chips ================= */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; border-radius: 20px; padding: 3px 11px;
+    white-space: nowrap;
+  }
+  .chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .c-active { background: var(--green-bg); color: var(--green); }
+  .c-process { background: var(--amber-bg); color: var(--amber); }
+  .c-plan { background: var(--grey-bg); color: var(--grey); }
+
+  /* ================= Program view ================= */
+  .prog-head { margin-bottom: 22px; }
+  .prog-kicker { font-size: 12.5px; color: var(--muted); font-feature-settings: "tnum" 1; margin-bottom: 4px; }
+  .prog-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .prog-title { font-family: var(--font-display); font-size: 26px; font-weight: 800; letter-spacing: -.2px; }
+  .prog-edit-btn { margin-left: auto; }
+  .prog-desc { font-size: 14px; color: #3C4238; max-width: 70ch; margin-top: 8px; }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 14px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+  .panel h4 { font-size: 12.5px; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
+  .stat { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+  .stat:last-child { border-bottom: none; }
+  .stat-value { font-weight: 700; color: var(--pine); text-align: right; }
+
+  /* Timeline */
+  .tl-item { position: relative; padding: 0 0 14px 26px; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before { content: ""; position: absolute; left: 5px; top: 16px; bottom: 0; width: 1px; background: var(--line); }
+  .tl-item:last-child::before { display: none; }
+  .tl-dot { position: absolute; left: 0; top: 5px; width: 11px; height: 11px; border-radius: 50%; background: #fff; border: 2px solid #C9CFC4; }
+  .tl-item.done .tl-dot { background: var(--green); border-color: var(--green); }
+  .tl-item.now .tl-dot { background: var(--lime); border-color: var(--lime); box-shadow: 0 0 0 3px rgba(124,179,66,.25); }
+  .tl-name { font-size: 13px; font-weight: 600; }
+  .tl-item.next .tl-name { color: var(--muted); font-weight: 500; }
+  .tl-date { font-size: 12px; color: var(--muted); font-feature-settings: "tnum" 1; }
+  .tl-item.now .tl-date { color: var(--amber); font-weight: 600; }
+
+  /* ================= Chart card (для скриншотов) ================= */
+  .chart-card {
+    margin-top: 14px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .chart-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; }
+  .chart-sub { font-size: 12px; color: var(--muted); margin: 2px 0 14px; }
+  .meter { display: grid; grid-template-columns: minmax(120px, 220px) 1fr minmax(130px, auto); align-items: center; gap: 14px; padding: 7px 0; }
+  .meter-label { font-size: 13px; }
+  .meter-track { height: 12px; background: var(--track); border-radius: 4px; overflow: hidden; }
+  .meter-fill { height: 100%; background: var(--pine); border-radius: 0 4px 4px 0; min-width: 0; }
+  .meter-fill.full { border-radius: 4px; }
+  .meter-value { font-size: 12.5px; color: var(--ink); text-align: right; white-space: nowrap; }
+  .meter-value .pct { font-weight: 700; }
+  .meter-value .plan { color: var(--muted); }
+  .chart-empty { font-size: 13px; color: var(--muted); padding: 6px 0 2px; }
+  .chart-legend { display: flex; gap: 18px; margin-top: 12px; font-size: 12px; color: var(--muted); }
+  .chart-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .sw-fact { background: var(--pine); }
+  .sw-plan { background: var(--track); }
+
+  .conclusion {
+    margin-top: 14px;
+    background: var(--green-bg); border-left: 3px solid var(--lime);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 13px 18px; font-size: 13.5px; color: #1E4634;
+  }
+  .conclusion .lbl { font-size: 11.5px; font-weight: 700; color: var(--green); margin-bottom: 2px; }
+
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 22px; }
+  .pager button {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    font: inherit; font-size: 12.5px; color: var(--muted); cursor: pointer;
+    padding: 8px 14px; max-width: 48%;
+    transition: border-color .12s ease, color .12s ease;
+  }
+  .pager button:hover:not(:disabled) { border-color: var(--lime); color: var(--ink); }
+  .pager button:disabled { opacity: .4; cursor: default; }
+  .pager b { color: var(--ink); font-weight: 600; }
+
+  /* ================= Editor ================= */
+  .editor { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-top: 14px; }
+  .editor h4 { font-size: 13px; font-weight: 700; margin: 18px 0 8px; }
+  .editor h4:first-child { margin-top: 0; }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .field input[type="text"], .field textarea, .field select {
+    width: 100%; font: inherit; font-size: 13px;
+    border: 1px solid var(--line); border-radius: 7px; padding: 7px 10px;
+    background: #fff; color: var(--ink);
+  }
+  .field textarea { min-height: 60px; resize: vertical; }
+  .edit-row { display: grid; grid-template-columns: 1fr 130px 130px 32px; gap: 8px; margin-bottom: 6px; align-items: center; }
+  .edit-row.geo-row { grid-template-columns: 1fr 200px 32px; }
+  .edit-row.stage-row { grid-template-columns: 1fr 150px 130px; }
+  .edit-row input, .edit-row select {
+    font: inherit; font-size: 13px; border: 1px solid var(--line); border-radius: 7px;
+    padding: 6px 9px; background: #fff; color: var(--ink); width: 100%;
+  }
+  .edit-row .row-head { font-size: 11.5px; color: var(--muted); font-weight: 400; }
+  .icon-btn { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; }
+  .icon-btn:hover { color: #A33B2A; }
+  .editor-actions { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+  .editor-note { font-size: 12px; color: var(--muted); margin-top: 12px; max-width: 70ch; }
+  .add-row-btn { margin-top: 4px; }
+
+  .src-chip {
+    font-size: 12px; color: var(--muted); white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .src-chip[hidden] { display: none; }
+  .src-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #C9CFC4; }
+  .src-chip.live::before { background: var(--green); }
+  .src-chip.stale::before { background: var(--amber); }
+  .src-chip.stale { color: var(--amber); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff; font-size: 13px;
+    padding: 10px 20px; border-radius: 8px; z-index: 100;
+    opacity: 0; pointer-events: none; transition: opacity .15s ease;
+  }
+  .toast.show { opacity: 1; }
+
+  .scrim { display: none; position: fixed; inset: 0; z-index: 35; background: rgba(20,24,19,.45); }
+  :focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+  /* ================= Responsive ================= */
+  @media (max-width: 1080px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .panels { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 900px) {
+    .src-chip { display: none; }
+    .side { transform: translateX(-100%); transition: transform .18s ease; }
+    .side.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,.3); }
+    .scrim.show { display: block; }
+    .main { margin-left: 0; }
+    .burger { display: block; }
+    .content { padding: 20px 16px 40px; }
+    .topbar { padding: 0 16px; }
+    .date-chip { display: none; }
+    .meter { grid-template-columns: 1fr; gap: 4px; padding: 10px 0; }
+    .meter-value { text-align: left; }
+  }
+  @media (max-width: 560px) {
+    .kpis { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .kpi-value { font-size: 22px; }
+    .prog-title { font-size: 21px; }
+    th:nth-child(5), td:nth-child(5) { display: none; }
+    .edit-row { grid-template-columns: 1fr 80px 80px 28px; }
+    .edit-row.geo-row { grid-template-columns: 1fr 110px 28px; }
+    .edit-row.stage-row { grid-template-columns: 1fr 110px 90px; }
+    .top-right .btn span.btn-text { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
 </head>
 <body>
-<p>Открывается панель… Если этого не произошло, <a href="damu-nefinansovaya-podderzhka.html">нажмите здесь</a>.</p>
+<div class="app">
+
+  <!-- ============ Sidebar ============ -->
+  <aside class="side" id="side" aria-label="Навигация по панели">
+    <div class="brand">
+      <div class="brand-mark">Д</div>
+      <div>
+        <div class="brand-name">Фонд «Даму»</div>
+        <div class="brand-sub">Нефинансовая поддержка</div>
+      </div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div>Данные на</div>
+      <div class="upd-date" id="side-date">—</div>
+      <div id="side-cadence">Обновляется еженедельно</div>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <!-- ============ Main ============ -->
+  <main class="main">
+    <header class="topbar">
+      <button class="burger" id="burger" aria-label="Открыть меню">☰</button>
+      <h1 id="view-title">Обзор портфеля</h1>
+      <div class="top-right">
+        <span class="src-chip" id="src-chip" hidden></span>
+        <span class="date-chip">Данные на <b id="top-date">—</b></span>
+        <button class="btn" id="btn-refresh" type="button" title="Загрузить свежие данные из таблицы" hidden>↻ <span class="btn-text">Обновить</span></button>
+        <button class="btn" id="btn-import" type="button" title="Загрузить данные из JSON-файла">⇪ <span class="btn-text">Импорт</span></button>
+        <button class="btn" id="btn-export" type="button" title="Скачать текущие данные в JSON">⇓ <span class="btn-text">Экспорт</span></button>
+        <input type="file" id="import-file" accept=".json,application/json" hidden>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ======= VIEW: Overview ======= -->
+      <section class="view" id="view-overview">
+        <div class="kpis" id="kpis"></div>
+
+        <div class="section-title">
+          Сводная таблица
+          <span class="hint">нажмите на строку, чтобы открыть программу</span>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr><th>№</th><th>Программа</th><th>Статус</th><th>Охват</th><th>География</th></tr>
+            </thead>
+            <tbody id="summary-body"></tbody>
+          </table>
+        </div>
+
+        <div class="section-title">
+          О панели
+          <button class="btn small" id="btn-edit-overview" type="button">Изменить дату и сводные KPI</button>
+        </div>
+        <div class="panel" id="about-panel" style="max-width:72ch; font-size:13px; color:#3C4238;">
+          Единая точка доступа к статусу программ нефинансовой поддержки для совещаний,
+          встреч и интервью — без обращения к сотрудникам профильного департамента.
+          Показатель без подтверждённого значения отображается как «—».
+          Ответственный — Департамент по продвижению программ и регионального развития Фонда «Даму».
+          Каждый сотрудник департамента обновляет свою программу через кнопку «Редактировать»
+          на её странице, затем отправляет данные ответственному через «Экспорт».
+        </div>
+        <div id="overview-editor-slot"></div>
+      </section>
+
+      <!-- ======= VIEW: Program ======= -->
+      <section class="view" id="view-program" hidden>
+        <div id="program-body"></div>
+        <div id="program-editor-slot"></div>
+        <div class="pager">
+          <button id="btn-prev" type="button"></button>
+          <button id="btn-next" type="button"></button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ ПО УМОЛЧАНИЮ
+   ────────────────────────────────────────────────────────────
+   Эти значения используются, пока сотрудник не внёс свои
+   данные через «Редактировать» (сохраняются в браузере) или
+   не загрузил JSON через «Импорт».
+   Ответственный за выпуск новой версии панели заменяет
+   значения ниже на итоговые данные недели.
+   Поле reach: [название, факт, план] — план нужен для диаграммы.
+   Нет подтверждённого значения — ставить "—". Не выдумывать цифры.
+   ============================================================ */
+
+/* ============================================================
+   ИСТОЧНИК ДАННЫХ — GOOGLE ТАБЛИЦА
+   ────────────────────────────────────────────────────────────
+   pubUrl  — ссылка «Файл → Поделиться → Опубликовать в интернете»,
+             весь документ, формат «Microsoft Excel (.xlsx)».
+   editUrl — обычная ссылка на таблицу (для кнопки «Редактировать»).
+   Пока pubUrl пустой, панель работает на данных ниже (DEFAULT_DATA)
+   и встроенном редакторе, как раньше.
+   ============================================================ */
+const SHEET = {
+  pubUrl: "",
+  editUrl: "",
+  refreshMinutes: 5,
+};
+
+const DEFAULT_DATA = {
+  date: "__.__.____",
+  kpi: { participants: "—", regions: "—" },
+  programs: [
+    {
+      name: "Центр поддержки и сопровождения бизнеса",
+      status: "active",
+      desc: "Сопровождение предпринимателей, оказавшихся в трудной финансовой ситуации: диагностика бизнеса, разработка плана финансового оздоровления, содействие в реструктуризации обязательств.",
+      reach: [["На сопровождении", "—", "—"], ["Завершили программу", "—", "—"], ["План на 2026 г.", "—", "—"]],
+      geo:   [["Регионов охвата", "—"], ["Формат", "очно / онлайн"], ["Пилотные регионы", "—"]],
+      stages: [
+        { name: "Запуск приёма заявок", state: "done", date: "—" },
+        { name: "Диагностика и планы оздоровления", state: "now", date: "—" },
+        { name: "Оценка результатов года", state: "next", date: "—" },
+      ],
+      conclusion: "Программа реализуется в штатном режиме. Показатели охвата уточняются по итогам недели.",
+    },
+    {
+      name: "Арманнан Іске",
+      status: "active",
+      desc: "Комплексная программа обучения и менторского сопровождения начинающих предпринимателей: от идеи до запуска собственного дела.",
+      reach: [["Обучено участников", "—", "—"], ["Запущено бизнесов", "—", "—"], ["Доля женщин, %", "—", "—"]],
+      geo:   [["Регионов охвата", "—"], ["Города присутствия", "—"], ["Формат", "офлайн / гибрид"]],
+      stages: [
+        { name: "Набор потока", state: "done", date: "—" },
+        { name: "Обучение и менторство", state: "now", date: "—" },
+        { name: "Защита бизнес-проектов", state: "next", date: "—" },
+      ],
+      conclusion: "Программа идёт по графику. Ключевой показатель — доля запущенных бизнесов от числа выпускников.",
+    },
+    {
+      name: "Онлайн-курсы",
+      status: "active",
+      desc: "Дистанционная образовательная платформа Фонда: курсы по основам предпринимательства, финансовой грамотности, маркетингу и управлению бизнесом.",
+      reach: [["Зарегистрировано слушателей", "—", "—"], ["Завершили курсы", "—", "—"], ["Курсов в каталоге", "—", "—"]],
+      geo:   [["Охват", "вся РК"], ["Языки обучения", "каз / рус"], ["Доступность", "24/7, бесплатно"]],
+      stages: [
+        { name: "Обновление контента платформы", state: "done", date: "—" },
+        { name: "Запуск новых курсов", state: "now", date: "—" },
+        { name: "Интеграция сертификации", state: "next", date: "—" },
+      ],
+      conclusion: "Наиболее масштабный инструмент по охвату. Динамика завершений курсов — основной индикатор качества контента.",
+    },
+    {
+      name: "Мобильный фронт-офис",
+      status: "active",
+      desc: "Выездные консультационные пункты для предпринимателей отдалённых и сельских районов: информирование о мерах поддержки, помощь в оформлении заявок.",
+      reach: [["Охвачено предпринимателей", "—", "—"], ["Проведено выездов", "—", "—"], ["Оформлено обращений", "—", "—"]],
+      geo:   [["Областей охвачено", "—"], ["Районов посещено", "—"], ["Маршрутов действует", "—"]],
+      stages: [
+        { name: "Формирование графика выездов", state: "done", date: "—" },
+        { name: "Выездная работа по регионам", state: "now", date: "—" },
+        { name: "Итоговый отчёт по охвату", state: "next", date: "—" },
+      ],
+      conclusion: "Обеспечивает доступность мер поддержки в сельских и отдалённых территориях. Маршруты корректируются по запросам акиматов.",
+    },
+    {
+      name: "Единый фронт-офис",
+      status: "active",
+      desc: "Централизованная точка приёма и сопровождения обращений предпринимателей по всем мерам поддержки Фонда: консультации, приём документов, маршрутизация заявок.",
+      reach: [["Принято обращений", "—", "—"], ["Доля решённых в срок, %", "—", "—"], ["Среднее время ответа, дн.", "—", "—"]],
+      geo:   [["Офисов в сети", "—"], ["Регионов присутствия", "—"], ["Каналы", "офис / колл-центр / онлайн"]],
+      stages: [
+        { name: "Унификация стандартов обслуживания", state: "done", date: "—" },
+        { name: "Цифровизация приёма обращений", state: "now", date: "—" },
+        { name: "Интеграция с CRM", state: "next", date: "—" },
+      ],
+      conclusion: "Ключевая точка входа для предпринимателей. Приоритет — сокращение сроков рассмотрения обращений.",
+    },
+    {
+      name: "Консалтинговые компании",
+      status: "active",
+      desc: "Субсидирование услуг профессиональных консалтинговых компаний для действующих предпринимателей: стратегия, финансы, маркетинг, юридическое сопровождение.",
+      reach: [["Аккредитовано компаний", "—", "—"], ["Оказано консультаций", "—", "—"], ["Доля субсидирования, %", "—", "—"]],
+      geo:   [["Регионов охвата", "—"], ["Отраслей консалтинга", "—"], ["Формат", "проектный / разовый"]],
+      stages: [
+        { name: "Аккредитация консультантов", state: "done", date: "—" },
+        { name: "Оказание услуг предпринимателям", state: "now", date: "—" },
+        { name: "Оценка эффективности услуг", state: "next", date: "—" },
+      ],
+      conclusion: "Механизм субсидирования повышает доступность профессионального консалтинга для МСБ. Контроль качества — через аккредитацию.",
+    },
+    {
+      name: "Маркетплейсы",
+      status: "active",
+      desc: "Обучение и содействие предпринимателям в выходе на электронные торговые площадки: регистрация, продвижение товаров, логистика, аналитика продаж.",
+      reach: [["Обучено продавцов", "—", "—"], ["Выведено на площадки", "—", "—"], ["Рост продаж участников, %", "—", "—"]],
+      geo:   [["Регионов охвата", "—"], ["Площадки-партнёры", "—"], ["Категории товаров", "—"]],
+      stages: [
+        { name: "Партнёрство с площадками", state: "done", date: "—" },
+        { name: "Обучение и вывод продавцов", state: "now", date: "—" },
+        { name: "Масштабирование на новые категории", state: "next", date: "—" },
+      ],
+      conclusion: "Инструмент выхода казахстанских производителей на онлайн-рынки, включая экспортный потенциал.",
+    },
+    {
+      name: "Франшизы",
+      status: "active",
+      desc: "Продвижение франчайзинга как модели запуска бизнеса: каталог проверенных франшиз, консультации по выбору, сопровождение сделок между франчайзером и предпринимателем.",
+      reach: [["Франшиз в каталоге", "—", "—"], ["Заключено сделок", "—", "—"], ["Получено консультаций", "—", "—"]],
+      geo:   [["Регионов охвата", "—"], ["Отраслей в каталоге", "—"], ["Международных брендов", "—"]],
+      stages: [
+        { name: "Формирование каталога франшиз", state: "done", date: "—" },
+        { name: "Подбор и сопровождение сделок", state: "now", date: "—" },
+        { name: "Развитие казахстанских франшиз", state: "next", date: "—" },
+      ],
+      conclusion: "Франчайзинг снижает риски старта для начинающих предпринимателей. Фокус — развитие отечественных франшиз.",
+    },
+  ],
+};
+
+const STATUS = {
+  active:  { label: "Реализуется",      cls: "c-active"  },
+  process: { label: "Набирает обороты", cls: "c-process" },
+  plan:    { label: "Планируется",      cls: "c-plan"    },
+  unknown: { label: "Статус не указан", cls: "c-plan"    },
+};
+const STAGE_LABEL = { done: "Выполнен", now: "В работе", next: "Впереди" };
+const STORE_KEY = "damu-panel-v2";
+
+/* ============================================================
+   ДВИЖОК ПРИЛОЖЕНИЯ
+   ============================================================ */
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const clone = (o) => JSON.parse(JSON.stringify(o));
+
+/* ---- Состояние: localStorage → defaults ---- */
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return clone(DEFAULT_DATA);
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.programs)) return clone(DEFAULT_DATA);
+    return parsed;
+  } catch { return clone(DEFAULT_DATA); }
+}
+function saveState() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+  catch { toast("Не удалось сохранить в браузере — используйте «Экспорт»"); }
+}
+/* В режиме таблицы локальные правки не используются: источник правды — таблица.
+   До первой загрузки показывается последняя успешно загруженная копия. */
+const LIVE = !!SHEET.pubUrl;
+const CACHE_KEY = "damu-sheet-cache-v1";
+function loadCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+    return c && c.data && Array.isArray(c.data.programs) ? c : null;
+  } catch { return null; }
+}
+/* Режим просмотра — по умолчанию для всех: без редактирования, импорта и экспорта,
+   локальные правки браузера не применяются — только официальные данные.
+   Режим редактирования для сотрудников ДППиРР — по адресу с ?mode=edit */
+const EDIT_MODE = new URLSearchParams(location.search).get("mode") === "edit";
+
+let cached = LIVE ? loadCache() : null;
+let state = LIVE ? (cached ? cached.data : clone(DEFAULT_DATA))
+                 : (EDIT_MODE ? loadState() : clone(DEFAULT_DATA));
+
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+function fmt(n) {
+  return Number(n).toLocaleString("ru-RU");
+}
+function parseNum(v) {
+  if (typeof v === "number") return v;
+  const m = String(v ?? "").replace(/[\s ]/g, "").replace(",", ".").match(/-?\d+(\.\d+)?/);
+  return m ? +m[0] : null;
+}
+
+/* ---- Общий рендер ---- */
+function renderAll(keepScroll) {
+  $("side-date").textContent = state.date;
+  $("top-date").textContent = state.date;
+  renderNav();
+  renderKpis();
+  renderSummary();
+  applyRoute(keepScroll);
+}
+
+function renderNav() {
+  const nav = $("nav");
+  nav.innerHTML = `
+    <div class="nav-label">Портфель</div>
+    <button class="nav-item" data-route="overview" type="button"><span class="idx">Σ</span><span>Обзор</span></button>
+    <div class="nav-divider"></div>
+    <div class="nav-label">Программы</div>
+  ` + state.programs.map((p, i) => `
+    <button class="nav-item" data-route="${i}" type="button">
+      <span class="idx">${String(i + 1).padStart(2, "0")}</span><span>${esc(p.name)}</span>
+    </button>`).join("");
+}
+
+function renderKpis() {
+  const activeCount = state.programs.filter((p) => p.status === "active").length;
+  $("kpis").innerHTML = `
+    <div class="kpi"><div class="kpi-value num">${state.programs.length}</div><div class="kpi-label">программ в портфеле</div></div>
+    <div class="kpi accent"><div class="kpi-value num">${esc(state.kpi.participants)}</div><div class="kpi-label">участников всего (2026)</div></div>
+    <div class="kpi"><div class="kpi-value num">${esc(state.kpi.regions)}</div><div class="kpi-label">регионов охвата</div></div>
+    <div class="kpi"><div class="kpi-value num">${activeCount}</div><div class="kpi-label">программ в активной стадии</div></div>
+  `;
+}
+
+function renderSummary() {
+  $("summary-body").innerHTML = state.programs.map((p, i) => {
+    const s = STATUS[p.status] || STATUS.plan;
+    const reachMain = p.reach[0] ? `${esc(p.reach[0][0])}: ${esc(p.reach[0][1])}` : "—";
+    const geoMain = p.geo[0] ? `${esc(p.geo[0][0])}: ${esc(p.geo[0][1])}` : "—";
+    return `
+      <tr data-route="${i}" tabindex="0" role="link" aria-label="Открыть: ${esc(p.name)}">
+        <td class="idx">${i + 1}</td>
+        <td><b>${esc(p.name)}</b></td>
+        <td><span class="chip ${s.cls}">${s.label}</span></td>
+        <td class="v num">${reachMain}</td>
+        <td>${geoMain}</td>
+      </tr>`;
+  }).join("");
+}
+
+/* ---- Диаграмма выполнения плана ---- */
+function renderChart(p) {
+  const items = p.reach
+    .map(([label, fact, plan]) => ({ label, fact, plan, f: parseNum(fact), pl: parseNum(plan) }))
+    .filter((o) => o.f !== null && o.pl !== null && o.pl > 0);
+
+  const head = `
+    <div class="chart-title">Выполнение плана — ${esc(p.name)}</div>
+    <div class="chart-sub">Факт против плана по ключевым показателям · данные на ${esc(state.date)}</div>`;
+
+  if (!items.length) {
+    return `<div class="chart-card">${head}
+      <div class="chart-empty">Диаграмма появится, когда у показателей будут заполнены факт и план.${
+        EDIT_MODE ? " Сотрудник программы может внести их через «Редактировать»." : ""}</div></div>`;
+  }
+
+  const rows = items.map((o) => {
+    const pct = o.f / o.pl * 100;
+    const w = Math.min(pct, 100);
+    return `
+      <div class="meter">
+        <div class="meter-label">${esc(o.label)}</div>
+        <div class="meter-track" role="img" aria-label="${esc(o.label)}: ${esc(String(o.fact))} из ${esc(String(o.plan))}, ${Math.round(pct)}%"
+             title="${esc(o.label)}: факт ${esc(String(o.fact))}, план ${esc(String(o.plan))} (${Math.round(pct)}%)">
+          <div class="meter-fill${w >= 100 ? " full" : ""}" style="width:${w.toFixed(1)}%"></div>
+        </div>
+        <div class="meter-value"><span class="pct">${Math.round(pct)}%</span> · ${fmt(o.f)} <span class="plan">/ ${fmt(o.pl)}</span></div>
+      </div>`;
+  }).join("");
+
+  return `<div class="chart-card">${head}${rows}
+    <div class="chart-legend">
+      <span><span class="sw sw-fact"></span>Факт</span>
+      <span><span class="sw sw-plan"></span>План (вся шкала)</span>
+    </div></div>`;
+}
+
+/* ---- Карточка программы ---- */
+function renderProgram(i) {
+  const p = state.programs[i];
+  const s = STATUS[p.status] || STATUS.plan;
+  const LIST = (rows) => rows.map((row) =>
+    `<div class="stat"><span>${esc(row[0])}</span><span class="stat-value">${esc(row[1])}</span></div>`).join("");
+
+  $("program-body").innerHTML = `
+    <div class="prog-head">
+      <div class="prog-kicker">Программа ${String(i + 1).padStart(2, "0")} из ${String(state.programs.length).padStart(2, "0")}</div>
+      <div class="prog-title-row">
+        <div class="prog-title">${esc(p.name)}</div>
+        <span class="chip ${s.cls}">${s.label}</span>
+        <button class="btn prog-edit-btn" id="btn-edit-program" type="button">Редактировать</button>
+      </div>
+      <div class="prog-desc">${esc(p.desc)}</div>
+    </div>
+    <div class="panels">
+      <div class="panel"><h4>Охват и участники</h4>${LIST(p.reach)}</div>
+      <div class="panel"><h4>География</h4>${LIST(p.geo)}</div>
+      <div class="panel"><h4>Этапы реализации</h4>
+        <div class="timeline">
+          ${p.stages.map((st) => `
+            <div class="tl-item ${esc(st.state)}">
+              <span class="tl-dot"></span>
+              <div class="tl-name">${esc(st.name)}</div>
+              <div class="tl-date">${esc(st.date)}</div>
+            </div>`).join("")}
+        </div>
+      </div>
+    </div>
+    ${renderChart(p)}
+    <div class="conclusion"><div class="lbl">Вывод</div>${esc(p.conclusion)}</div>
+  `;
+  const editBtn = $("btn-edit-program");
+  if (!EDIT_MODE) editBtn.hidden = true;
+  else if (LIVE) { editBtn.textContent = "Редактировать в таблице ↗"; editBtn.onclick = openSheet; }
+  else editBtn.onclick = () => openProgramEditor(i);
+
+  const prev = $("btn-prev"), next = $("btn-next");
+  if (i > 0) {
+    prev.disabled = false;
+    prev.innerHTML = `← <b>${String(i).padStart(2, "0")}</b> ${esc(state.programs[i - 1].name)}`;
+    prev.onclick = () => go(i - 1);
+  } else { prev.disabled = true; prev.textContent = "—"; prev.onclick = null; }
+  if (i < state.programs.length - 1) {
+    next.disabled = false;
+    next.innerHTML = `<b>${String(i + 2).padStart(2, "0")}</b> ${esc(state.programs[i + 1].name)} →`;
+    next.onclick = () => go(i + 1);
+  } else { next.disabled = true; next.textContent = "—"; next.onclick = null; }
+}
+
+/* ---- Редактор программы ---- */
+function openProgramEditor(i) {
+  const p = state.programs[i];
+  const slot = $("program-editor-slot");
+  const rowHeads = `<div class="edit-row"><span class="row-head">Показатель</span><span class="row-head">Факт</span><span class="row-head">План</span><span></span></div>`;
+
+  slot.innerHTML = `
+    <div class="editor">
+      <h4>Статус и описание</h4>
+      <div class="field"><label>Статус реализации</label>
+        <select id="ed-status">
+          ${Object.entries(STATUS).map(([k, v]) => `<option value="${k}"${p.status === k ? " selected" : ""}>${v.label}</option>`).join("")}
+        </select>
+      </div>
+      <div class="field"><label>Описание (1–2 предложения)</label><textarea id="ed-desc">${esc(p.desc)}</textarea></div>
+
+      <h4>Охват и участники</h4>
+      <div id="ed-reach">${rowHeads}${p.reach.map((r) => reachRow(r)).join("")}</div>
+      <button class="btn small add-row-btn" id="ed-add-reach" type="button">+ Добавить показатель</button>
+
+      <h4>География</h4>
+      <div id="ed-geo">${p.geo.map((r) => geoRow(r)).join("")}</div>
+      <button class="btn small add-row-btn" id="ed-add-geo" type="button">+ Добавить строку</button>
+
+      <h4>Этапы реализации</h4>
+      <div id="ed-stages">${p.stages.map((st) => stageRow(st)).join("")}</div>
+
+      <h4>Вывод для совещаний</h4>
+      <div class="field"><textarea id="ed-conclusion">${esc(p.conclusion)}</textarea></div>
+
+      <div class="editor-actions">
+        <button class="btn primary" id="ed-save" type="button">Сохранить</button>
+        <button class="btn" id="ed-cancel" type="button">Отмена</button>
+      </div>
+      <div class="editor-note">
+        Изменения сохраняются в этом браузере. Чтобы передать их коллегам и ответственному
+        за панель, нажмите «Экспорт» в верхней панели и отправьте скачанный JSON-файл.
+        Кнопка «Импорт» у коллег загрузит ваши данные. Не выдумывайте цифры:
+        если значения нет — оставьте «—».
+      </div>
+    </div>`;
+
+  function reachRow(r) {
+    return `<div class="edit-row">
+      <input type="text" class="er-label" value="${esc(r[0])}" placeholder="Показатель">
+      <input type="text" class="er-fact" value="${esc(r[1])}" placeholder="—">
+      <input type="text" class="er-plan" value="${esc(r[2] ?? "—")}" placeholder="—">
+      <button class="icon-btn" type="button" title="Удалить строку" onclick="this.parentElement.remove()">×</button>
+    </div>`;
+  }
+  function geoRow(r) {
+    return `<div class="edit-row geo-row">
+      <input type="text" class="er-label" value="${esc(r[0])}" placeholder="Показатель">
+      <input type="text" class="er-fact" value="${esc(r[1])}" placeholder="—">
+      <button class="icon-btn" type="button" title="Удалить строку" onclick="this.parentElement.remove()">×</button>
+    </div>`;
+  }
+  function stageRow(st) {
+    return `<div class="edit-row stage-row">
+      <input type="text" class="es-name" value="${esc(st.name)}" placeholder="Этап">
+      <select class="es-state">${Object.entries(STAGE_LABEL).map(([k, v]) =>
+        `<option value="${k}"${st.state === k ? " selected" : ""}>${v}</option>`).join("")}</select>
+      <input type="text" class="es-date" value="${esc(st.date)}" placeholder="дата">
+    </div>`;
+  }
+
+  $("ed-add-reach").onclick = () => $("ed-reach").insertAdjacentHTML("beforeend", reachRow(["", "—", "—"]));
+  $("ed-add-geo").onclick = () => $("ed-geo").insertAdjacentHTML("beforeend", geoRow(["", "—"]));
+  $("ed-cancel").onclick = () => { slot.innerHTML = ""; };
+  $("ed-save").onclick = () => {
+    const np = clone(p);
+    np.status = $("ed-status").value;
+    np.desc = $("ed-desc").value.trim();
+    np.reach = [...$("ed-reach").querySelectorAll(".edit-row")].filter((r) => r.querySelector(".er-label"))
+      .map((r) => [r.querySelector(".er-label").value.trim(), r.querySelector(".er-fact").value.trim() || "—", r.querySelector(".er-plan").value.trim() || "—"])
+      .filter((r) => r[0]);
+    np.geo = [...$("ed-geo").querySelectorAll(".geo-row")]
+      .map((r) => [r.querySelector(".er-label").value.trim(), r.querySelector(".er-fact").value.trim() || "—"])
+      .filter((r) => r[0]);
+    np.stages = [...$("ed-stages").querySelectorAll(".stage-row")].map((r) => ({
+      name: r.querySelector(".es-name").value.trim(),
+      state: r.querySelector(".es-state").value,
+      date: r.querySelector(".es-date").value.trim() || "—",
+    })).filter((s) => s.name);
+    np.conclusion = $("ed-conclusion").value.trim();
+    state.programs[i] = np;
+    saveState();
+    slot.innerHTML = "";
+    renderAll();
+    toast("Сохранено. Не забудьте «Экспорт», чтобы передать данные ответственному.");
+  };
+  slot.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* ---- Редактор даты и сводных KPI ---- */
+$("btn-edit-overview").onclick = () => {
+  const slot = $("overview-editor-slot");
+  slot.innerHTML = `
+    <div class="editor" style="max-width:520px;">
+      <div class="field"><label>Дата актуальности данных</label>
+        <input type="text" id="ed-date" value="${esc(state.date)}" placeholder="дд.мм.гггг"></div>
+      <div class="field"><label>Участников всего (2026)</label>
+        <input type="text" id="ed-kpi-participants" value="${esc(state.kpi.participants)}"></div>
+      <div class="field"><label>Регионов охвата</label>
+        <input type="text" id="ed-kpi-regions" value="${esc(state.kpi.regions)}"></div>
+      <div class="editor-actions">
+        <button class="btn primary" id="ed-ov-save" type="button">Сохранить</button>
+        <button class="btn" id="ed-ov-cancel" type="button">Отмена</button>
+        <button class="btn danger" id="ed-ov-reset" type="button" title="Удалить локальные данные и вернуться к значениям из файла">Сбросить все данные</button>
+      </div>
+    </div>`;
+  $("ed-ov-cancel").onclick = () => { slot.innerHTML = ""; };
+  $("ed-ov-save").onclick = () => {
+    state.date = $("ed-date").value.trim() || "—";
+    state.kpi.participants = $("ed-kpi-participants").value.trim() || "—";
+    state.kpi.regions = $("ed-kpi-regions").value.trim() || "—";
+    saveState(); slot.innerHTML = ""; renderAll();
+    toast("Сводные показатели обновлены");
+  };
+  $("ed-ov-reset").onclick = () => {
+    if (!confirm("Удалить все данные, внесённые в этом браузере, и вернуться к значениям из HTML-файла?")) return;
+    localStorage.removeItem(STORE_KEY);
+    state = clone(DEFAULT_DATA);
+    slot.innerHTML = ""; renderAll();
+    toast("Данные сброшены к значениям из файла");
+  };
+};
+
+/* ---- Экспорт / импорт ---- */
+/* В просмотрщике Claude скачивание идёт через capability `downloads`;
+   в обычном браузере и на GitHub Pages — через ссылку, как раньше. */
+let claudeDownloads = null;
+if (window.claude && typeof window.claude.use === "function") {
+  window.claude.use("downloads").then((d) => { claudeDownloads = d; }).catch(() => {});
+}
+$("btn-export").onclick = async () => {
+  const json = JSON.stringify(state, null, 2);
+  const filename = "damu-data-" + new Date().toISOString().slice(0, 10) + ".json";
+  if (claudeDownloads) {
+    try {
+      await claudeDownloads.save({ filename, data: json });
+      toast("Файл данных скачан — отправьте его ответственному за панель");
+    } catch (err) {
+      const code = err && err.code;
+      if (code === "declined") toast("Скачивание отменено");
+      else if (code === "rate_limited") toast("Подтвердите открытое окно сохранения или повторите через минуту");
+      else toast("Скачивание недоступно в этом окне — откройте панель на GitHub Pages");
+    }
+    return;
+  }
+  const blob = new Blob([json], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast("Файл данных скачан — отправьте его ответственному за панель");
+};
+$("btn-import").onclick = () => $("import-file").click();
+$("import-file").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data || !Array.isArray(data.programs) || !data.programs.every((p) => p && typeof p.name === "string" && Array.isArray(p.reach))) {
+        throw new Error("shape");
+      }
+      data.date = data.date || "—";
+      data.kpi = data.kpi || { participants: "—", regions: "—" };
+      state = data;
+      saveState(); renderAll();
+      toast("Данные загружены");
+    } catch {
+      toast("Не удалось загрузить: файл не похож на данные панели");
+    }
+  };
+  reader.readAsText(file);
+});
+
+/* ---- Роутинг ---- */
+function go(route) {
+  location.hash = route === "overview" ? "/" : "/program/" + route;
+}
+function applyRoute(keepScroll) {
+  const h = location.hash.replace(/^#\/?/, "");
+  const m = h.match(/^program\/(\d+)$/);
+  const isProg = m && state.programs[+m[1]];
+  $("view-overview").hidden = !!isProg;
+  $("view-program").hidden = !isProg;
+  $("program-editor-slot").innerHTML = "";
+  document.querySelectorAll(".nav-item").forEach((el) => {
+    el.classList.toggle("active", el.dataset.route === (isProg ? m[1] : "overview"));
+  });
+  if (isProg) {
+    renderProgram(+m[1]);
+    $("view-title").textContent = state.programs[+m[1]].name;
+    document.title = state.programs[+m[1]].name + " — Фонд «Даму»";
+  } else {
+    $("view-title").textContent = "Обзор портфеля";
+    document.title = "Фонд «Даму» — Пульт нефинансовой поддержки";
+  }
+  closeSide();
+  if (!keepScroll) window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", () => applyRoute());
+
+/* ---- Сайдбар на мобильных ---- */
+const side = $("side"), scrim = $("scrim");
+function closeSide() { side.classList.remove("open"); scrim.classList.remove("show"); }
+$("burger").addEventListener("click", () => { side.classList.add("open"); scrim.classList.add("show"); });
+scrim.addEventListener("click", closeSide);
+
+/* ---- События ---- */
+$("nav").addEventListener("click", (e) => {
+  const btn = e.target.closest(".nav-item");
+  if (btn) go(btn.dataset.route);
+});
+$("summary-body").addEventListener("click", (e) => {
+  const row = e.target.closest("tr[data-route]");
+  if (row) go(row.dataset.route);
+});
+$("summary-body").addEventListener("keydown", (e) => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches("tr[data-route]")) {
+    e.preventDefault(); go(e.target.dataset.route);
+  }
+});
+
+/* ============================================================
+   РЕЖИМ GOOGLE ТАБЛИЦЫ
+   Лист «Сводка» — дата и сводные KPI; листы «01 …» — «08 …» —
+   программы (колонки: Раздел | Показатель | Факт/значение | План/дата).
+   ============================================================ */
+function openSheet() {
+  if (SHEET.editUrl) window.open(SHEET.editUrl, "_blank", "noopener");
+  else toast("Ссылка на таблицу не указана — обратитесь к ответственному за панель");
+}
+
+let xlsxLib = null;
+function loadXlsxLib() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (xlsxLib) return xlsxLib;
+  xlsxLib = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    s.onload = () => (window.XLSX ? resolve(window.XLSX) : reject(new Error("lib")));
+    s.onerror = () => { xlsxLib = null; reject(new Error("lib")); };
+    document.head.appendChild(s);
+  });
+  return xlsxLib;
+}
+
+const norm = (s) => String(s ?? "").trim().toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ");
+const dash = (s) => (s === "" ? "—" : s);
+const pad2 = (n) => String(n).padStart(2, "0");
+const STATUS_IN = { "реализуется": "active", "набирает обороты": "process", "планируется": "plan" };
+const STAGE_IN = { "выполнен": "done", "в работе": "now", "впереди": "next" };
+
+/* Даты из таблицы → ДД.ММ.ГГГГ без сдвига часового пояса */
+function fixDates(ws, X) {
+  for (const addr in ws) {
+    if (addr[0] === "!") continue;
+    const c = ws[addr];
+    if (c && c.t === "n" && c.z && X.SSF.is_date(c.z)) {
+      const p = X.SSF.parse_date_code(c.v);
+      if (p) { c.v = `${pad2(p.d)}.${pad2(p.m)}.${p.y}`; c.t = "s"; }
+    }
+  }
+}
+function cellText(v) {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "number") return v.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
+  return String(v).trim();
+}
+
+function parseWorkbook(wb, X) {
+  const data = { date: "—", kpi: { participants: "—", regions: "—" }, programs: [] };
+  const progs = [];
+  wb.SheetNames.forEach((sheetName) => {
+    const ws = wb.Sheets[sheetName];
+    fixDates(ws, X);
+    const rows = X.utils.sheet_to_json(ws, { header: 1, defval: "", raw: true, blankrows: false });
+    if (norm(sheetName) === "сводка") {
+      rows.forEach((r) => {
+        const k = norm(r[0]), v = dash(cellText(r[1]));
+        if (k.startsWith("дата актуальности")) data.date = v;
+        else if (k.startsWith("участников")) data.kpi.participants = v;
+        else if (k.startsWith("регионов")) data.kpi.regions = v;
+      });
+      return;
+    }
+    const m = sheetName.match(/^\s*(\d{1,2})\s*(.*)$/);
+    if (!m) return;
+    const p = { name: m[2].trim() || sheetName, status: "unknown", desc: "", reach: [], geo: [], stages: [], conclusion: "" };
+    rows.forEach((r) => {
+      const sec = norm(r[0]);
+      const b = cellText(r[1]), c = cellText(r[2]), d = cellText(r[3]);
+      if (sec === "название" && b) p.name = b;
+      else if (sec === "статус") p.status = STATUS_IN[norm(b)] || "unknown";
+      else if (sec === "описание") p.desc = b;
+      else if (sec === "охват" && b) p.reach.push([b, dash(c), dash(d)]);
+      else if (sec === "география" && b) p.geo.push([b, dash(c)]);
+      else if (sec === "этап" && b) p.stages.push({ name: b, state: STAGE_IN[norm(c)] || "next", date: dash(d) });
+      else if (sec === "вывод") p.conclusion = b;
+    });
+    progs.push({ n: +m[1], p });
+  });
+  if (!progs.length) throw new Error("no-programs");
+  data.programs = progs.sort((a, b) => a.n - b.n).map((o) => o.p);
+  return data;
+}
+
+const hhmm = (d) => d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+const ddmm = (d) => `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)} ${hhmm(d)}`;
+function setSrc(mode) {
+  const chip = $("src-chip");
+  chip.hidden = false;
+  chip.className = "src-chip" + (mode === "live" ? " live" : mode === "stale" ? " stale" : "");
+  if (mode === "loading") chip.textContent = "Загрузка таблицы…";
+  else if (mode === "live") chip.textContent = "Google Таблица · " + hhmm(lastLoaded);
+  else chip.textContent = cached ? "Таблица недоступна · копия от " + ddmm(new Date(cached.at))
+                                 : "Таблица недоступна · данные из файла";
+}
+
+let lastLoaded = null, loading = false;
+async function loadSheet(manual) {
+  if (loading) return;
+  loading = true;
+  if (!lastLoaded) setSrc("loading");
+  try {
+    const X = await loadXlsxLib();
+    const res = await fetch(SHEET.pubUrl, { cache: "no-store" });
+    if (!res.ok) throw new Error("http " + res.status);
+    const wb = X.read(await res.arrayBuffer(), { type: "array", cellNF: true });
+    state = parseWorkbook(wb, X);
+    lastLoaded = new Date();
+    cached = { at: lastLoaded.toISOString(), data: state };
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(cached)); } catch {}
+    setSrc("live");
+    renderAll(true);
+    if (manual) toast("Данные обновлены из таблицы");
+  } catch (e) {
+    setSrc("stale");
+    if (manual) toast("Не удалось загрузить таблицу — показаны последние доступные данные");
+  } finally {
+    loading = false;
+  }
+}
+
+if (LIVE) {
+  $("side-cadence").textContent = "Обновляется из таблицы автоматически";
+  $("btn-import").hidden = true;
+  $("btn-refresh").hidden = false;
+  $("btn-refresh").onclick = () => loadSheet(true);
+  $("btn-edit-overview").textContent = "Открыть таблицу ↗";
+  $("btn-edit-overview").onclick = openSheet;
+  $("about-panel").textContent =
+    "Единая точка доступа к статусу программ нефинансовой поддержки для совещаний, встреч и интервью. " +
+    "Данные загружаются из общей Google Таблицы и обновляются автоматически каждые " + SHEET.refreshMinutes +
+    " минут. Показатель без подтверждённого значения отображается как «—». " +
+    "Ответственный — Департамент по продвижению программ и регионального развития Фонда «Даму». " +
+    "Сотрудник обновляет свою программу на её листе в таблице (кнопка «Редактировать в таблице»).";
+  setInterval(() => loadSheet(false), SHEET.refreshMinutes * 60e3);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" &&
+        (!lastLoaded || Date.now() - lastLoaded > SHEET.refreshMinutes * 60e3)) loadSheet(false);
+  });
+}
+
+if (EDIT_MODE) {
+  const chip = document.createElement("span");
+  chip.className = "date-chip";
+  chip.textContent = "Режим редактирования";
+  chip.style.cssText = "color:var(--amber);border-color:var(--amber);";
+  $("top-date").parentElement.after(chip);
+} else {
+  ["btn-import", "btn-export", "btn-edit-overview"].forEach((id) => { $(id).hidden = true; });
+  $("about-panel").textContent =
+    "Единая точка доступа к статусу программ нефинансовой поддержки для совещаний, встреч и интервью. " +
+    "Страница только для просмотра. Показатель без подтверждённого значения отображается как «—». " +
+    "Данные ведёт Департамент по продвижению программ и регионального развития Фонда «Даму»; " +
+    "по вопросам о цифрах обращайтесь в департамент.";
+}
+
+renderAll();
+if (LIVE) loadSheet(false);
+</script>
 </body>
 </html>
