@@ -273,6 +273,16 @@
   .editor-note { font-size: 12px; color: var(--muted); margin-top: 12px; max-width: 70ch; }
   .add-row-btn { margin-top: 4px; }
 
+  .src-chip {
+    font-size: 12px; color: var(--muted); white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .src-chip[hidden] { display: none; }
+  .src-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #C9CFC4; }
+  .src-chip.live::before { background: var(--green); }
+  .src-chip.stale::before { background: var(--amber); }
+  .src-chip.stale { color: var(--amber); }
+
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     background: var(--ink); color: #fff; font-size: 13px;
@@ -290,6 +300,7 @@
     .panels { grid-template-columns: 1fr; }
   }
   @media (max-width: 900px) {
+    .src-chip { display: none; }
     .side { transform: translateX(-100%); transition: transform .18s ease; }
     .side.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,.3); }
     .scrim.show { display: block; }
@@ -332,7 +343,7 @@
     <div class="side-foot">
       <div>Данные на</div>
       <div class="upd-date" id="side-date">—</div>
-      <div>Обновляется еженедельно</div>
+      <div id="side-cadence">Обновляется еженедельно</div>
     </div>
   </aside>
   <div class="scrim" id="scrim"></div>
@@ -343,7 +354,9 @@
       <button class="burger" id="burger" aria-label="Открыть меню">☰</button>
       <h1 id="view-title">Обзор портфеля</h1>
       <div class="top-right">
+        <span class="src-chip" id="src-chip" hidden></span>
         <span class="date-chip">Данные на <b id="top-date">—</b></span>
+        <button class="btn" id="btn-refresh" type="button" title="Загрузить свежие данные из таблицы" hidden>↻ <span class="btn-text">Обновить</span></button>
         <button class="btn" id="btn-import" type="button" title="Загрузить данные из JSON-файла">⇪ <span class="btn-text">Импорт</span></button>
         <button class="btn" id="btn-export" type="button" title="Скачать текущие данные в JSON">⇓ <span class="btn-text">Экспорт</span></button>
         <input type="file" id="import-file" accept=".json,application/json" hidden>
@@ -373,7 +386,7 @@
           О панели
           <button class="btn small" id="btn-edit-overview" type="button">Изменить дату и сводные KPI</button>
         </div>
-        <div class="panel" style="max-width:72ch; font-size:13px; color:#3C4238;">
+        <div class="panel" id="about-panel" style="max-width:72ch; font-size:13px; color:#3C4238;">
           Единая точка доступа к статусу программ нефинансовой поддержки для совещаний,
           встреч и интервью — без обращения к сотрудникам профильного департамента.
           Показатель без подтверждённого значения отображается как «—».
@@ -411,6 +424,21 @@
    Поле reach: [название, факт, план] — план нужен для диаграммы.
    Нет подтверждённого значения — ставить "—". Не выдумывать цифры.
    ============================================================ */
+
+/* ============================================================
+   ИСТОЧНИК ДАННЫХ — GOOGLE ТАБЛИЦА
+   ────────────────────────────────────────────────────────────
+   pubUrl  — ссылка «Файл → Поделиться → Опубликовать в интернете»,
+             весь документ, формат «Microsoft Excel (.xlsx)».
+   editUrl — обычная ссылка на таблицу (для кнопки «Редактировать»).
+   Пока pubUrl пустой, панель работает на данных ниже (DEFAULT_DATA)
+   и встроенном редакторе, как раньше.
+   ============================================================ */
+const SHEET = {
+  pubUrl: "",
+  editUrl: "",
+  refreshMinutes: 5,
+};
 
 const DEFAULT_DATA = {
   date: "__.__.____",
@@ -527,6 +555,7 @@ const STATUS = {
   active:  { label: "Реализуется",      cls: "c-active"  },
   process: { label: "Набирает обороты", cls: "c-process" },
   plan:    { label: "Планируется",      cls: "c-plan"    },
+  unknown: { label: "Статус не указан", cls: "c-plan"    },
 };
 const STAGE_LABEL = { done: "Выполнен", now: "В работе", next: "Впереди" };
 const STORE_KEY = "damu-panel-v2";
@@ -553,7 +582,18 @@ function saveState() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
   catch { toast("Не удалось сохранить в браузере — используйте «Экспорт»"); }
 }
-let state = loadState();
+/* В режиме таблицы локальные правки не используются: источник правды — таблица.
+   До первой загрузки показывается последняя успешно загруженная копия. */
+const LIVE = !!SHEET.pubUrl;
+const CACHE_KEY = "damu-sheet-cache-v1";
+function loadCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+    return c && c.data && Array.isArray(c.data.programs) ? c : null;
+  } catch { return null; }
+}
+let cached = LIVE ? loadCache() : null;
+let state = LIVE ? (cached ? cached.data : clone(DEFAULT_DATA)) : loadState();
 
 function toast(msg) {
   const t = $("toast");
@@ -573,13 +613,13 @@ function parseNum(v) {
 }
 
 /* ---- Общий рендер ---- */
-function renderAll() {
+function renderAll(keepScroll) {
   $("side-date").textContent = state.date;
   $("top-date").textContent = state.date;
   renderNav();
   renderKpis();
   renderSummary();
-  applyRoute();
+  applyRoute(keepScroll);
 }
 
 function renderNav() {
@@ -692,7 +732,9 @@ function renderProgram(i) {
     ${renderChart(p)}
     <div class="conclusion"><div class="lbl">Вывод</div>${esc(p.conclusion)}</div>
   `;
-  $("btn-edit-program").onclick = () => openProgramEditor(i);
+  const editBtn = $("btn-edit-program");
+  if (LIVE) { editBtn.textContent = "Редактировать в таблице ↗"; editBtn.onclick = openSheet; }
+  else editBtn.onclick = () => openProgramEditor(i);
 
   const prev = $("btn-prev"), next = $("btn-next");
   if (i > 0) {
@@ -893,7 +935,7 @@ $("import-file").addEventListener("change", (e) => {
 function go(route) {
   location.hash = route === "overview" ? "/" : "/program/" + route;
 }
-function applyRoute() {
+function applyRoute(keepScroll) {
   const h = location.hash.replace(/^#\/?/, "");
   const m = h.match(/^program\/(\d+)$/);
   const isProg = m && state.programs[+m[1]];
@@ -912,9 +954,9 @@ function applyRoute() {
     document.title = "Фонд «Даму» — Пульт нефинансовой поддержки";
   }
   closeSide();
-  window.scrollTo(0, 0);
+  if (!keepScroll) window.scrollTo(0, 0);
 }
-window.addEventListener("hashchange", applyRoute);
+window.addEventListener("hashchange", () => applyRoute());
 
 /* ---- Сайдбар на мобильных ---- */
 const side = $("side"), scrim = $("scrim");
@@ -937,7 +979,149 @@ $("summary-body").addEventListener("keydown", (e) => {
   }
 });
 
+/* ============================================================
+   РЕЖИМ GOOGLE ТАБЛИЦЫ
+   Лист «Сводка» — дата и сводные KPI; листы «01 …» — «08 …» —
+   программы (колонки: Раздел | Показатель | Факт/значение | План/дата).
+   ============================================================ */
+function openSheet() {
+  if (SHEET.editUrl) window.open(SHEET.editUrl, "_blank", "noopener");
+  else toast("Ссылка на таблицу не указана — обратитесь к ответственному за панель");
+}
+
+let xlsxLib = null;
+function loadXlsxLib() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (xlsxLib) return xlsxLib;
+  xlsxLib = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    s.onload = () => (window.XLSX ? resolve(window.XLSX) : reject(new Error("lib")));
+    s.onerror = () => { xlsxLib = null; reject(new Error("lib")); };
+    document.head.appendChild(s);
+  });
+  return xlsxLib;
+}
+
+const norm = (s) => String(s ?? "").trim().toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ");
+const dash = (s) => (s === "" ? "—" : s);
+const pad2 = (n) => String(n).padStart(2, "0");
+const STATUS_IN = { "реализуется": "active", "набирает обороты": "process", "планируется": "plan" };
+const STAGE_IN = { "выполнен": "done", "в работе": "now", "впереди": "next" };
+
+/* Даты из таблицы → ДД.ММ.ГГГГ без сдвига часового пояса */
+function fixDates(ws, X) {
+  for (const addr in ws) {
+    if (addr[0] === "!") continue;
+    const c = ws[addr];
+    if (c && c.t === "n" && c.z && X.SSF.is_date(c.z)) {
+      const p = X.SSF.parse_date_code(c.v);
+      if (p) { c.v = `${pad2(p.d)}.${pad2(p.m)}.${p.y}`; c.t = "s"; }
+    }
+  }
+}
+function cellText(v) {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "number") return v.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
+  return String(v).trim();
+}
+
+function parseWorkbook(wb, X) {
+  const data = { date: "—", kpi: { participants: "—", regions: "—" }, programs: [] };
+  const progs = [];
+  wb.SheetNames.forEach((sheetName) => {
+    const ws = wb.Sheets[sheetName];
+    fixDates(ws, X);
+    const rows = X.utils.sheet_to_json(ws, { header: 1, defval: "", raw: true, blankrows: false });
+    if (norm(sheetName) === "сводка") {
+      rows.forEach((r) => {
+        const k = norm(r[0]), v = dash(cellText(r[1]));
+        if (k.startsWith("дата актуальности")) data.date = v;
+        else if (k.startsWith("участников")) data.kpi.participants = v;
+        else if (k.startsWith("регионов")) data.kpi.regions = v;
+      });
+      return;
+    }
+    const m = sheetName.match(/^\s*(\d{1,2})\s*(.*)$/);
+    if (!m) return;
+    const p = { name: m[2].trim() || sheetName, status: "unknown", desc: "", reach: [], geo: [], stages: [], conclusion: "" };
+    rows.forEach((r) => {
+      const sec = norm(r[0]);
+      const b = cellText(r[1]), c = cellText(r[2]), d = cellText(r[3]);
+      if (sec === "название" && b) p.name = b;
+      else if (sec === "статус") p.status = STATUS_IN[norm(b)] || "unknown";
+      else if (sec === "описание") p.desc = b;
+      else if (sec === "охват" && b) p.reach.push([b, dash(c), dash(d)]);
+      else if (sec === "география" && b) p.geo.push([b, dash(c)]);
+      else if (sec === "этап" && b) p.stages.push({ name: b, state: STAGE_IN[norm(c)] || "next", date: dash(d) });
+      else if (sec === "вывод") p.conclusion = b;
+    });
+    progs.push({ n: +m[1], p });
+  });
+  if (!progs.length) throw new Error("no-programs");
+  data.programs = progs.sort((a, b) => a.n - b.n).map((o) => o.p);
+  return data;
+}
+
+const hhmm = (d) => d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+const ddmm = (d) => `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)} ${hhmm(d)}`;
+function setSrc(mode) {
+  const chip = $("src-chip");
+  chip.hidden = false;
+  chip.className = "src-chip" + (mode === "live" ? " live" : mode === "stale" ? " stale" : "");
+  if (mode === "loading") chip.textContent = "Загрузка таблицы…";
+  else if (mode === "live") chip.textContent = "Google Таблица · " + hhmm(lastLoaded);
+  else chip.textContent = cached ? "Таблица недоступна · копия от " + ddmm(new Date(cached.at))
+                                 : "Таблица недоступна · данные из файла";
+}
+
+let lastLoaded = null, loading = false;
+async function loadSheet(manual) {
+  if (loading) return;
+  loading = true;
+  if (!lastLoaded) setSrc("loading");
+  try {
+    const X = await loadXlsxLib();
+    const res = await fetch(SHEET.pubUrl, { cache: "no-store" });
+    if (!res.ok) throw new Error("http " + res.status);
+    const wb = X.read(await res.arrayBuffer(), { type: "array", cellNF: true });
+    state = parseWorkbook(wb, X);
+    lastLoaded = new Date();
+    cached = { at: lastLoaded.toISOString(), data: state };
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(cached)); } catch {}
+    setSrc("live");
+    renderAll(true);
+    if (manual) toast("Данные обновлены из таблицы");
+  } catch (e) {
+    setSrc("stale");
+    if (manual) toast("Не удалось загрузить таблицу — показаны последние доступные данные");
+  } finally {
+    loading = false;
+  }
+}
+
+if (LIVE) {
+  $("side-cadence").textContent = "Обновляется из таблицы автоматически";
+  $("btn-import").hidden = true;
+  $("btn-refresh").hidden = false;
+  $("btn-refresh").onclick = () => loadSheet(true);
+  $("btn-edit-overview").textContent = "Открыть таблицу ↗";
+  $("btn-edit-overview").onclick = openSheet;
+  $("about-panel").textContent =
+    "Единая точка доступа к статусу программ нефинансовой поддержки для совещаний, встреч и интервью. " +
+    "Данные загружаются из общей Google Таблицы и обновляются автоматически каждые " + SHEET.refreshMinutes +
+    " минут. Показатель без подтверждённого значения отображается как «—». " +
+    "Ответственный — Департамент по продвижению программ и регионального развития Фонда «Даму». " +
+    "Сотрудник обновляет свою программу на её листе в таблице (кнопка «Редактировать в таблице»).";
+  setInterval(() => loadSheet(false), SHEET.refreshMinutes * 60e3);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" &&
+        (!lastLoaded || Date.now() - lastLoaded > SHEET.refreshMinutes * 60e3)) loadSheet(false);
+  });
+}
+
 renderAll();
+if (LIVE) loadSheet(false);
 </script>
 </body>
 </html>
