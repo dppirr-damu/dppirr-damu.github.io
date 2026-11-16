@@ -192,6 +192,9 @@
   .stat { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
   .stat:last-child { border-bottom: none; }
   .stat-value { font-weight: 700; color: var(--pine); text-align: right; }
+  /* Длинное значение — под названием показателя, по левому краю */
+  .stat.long { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .stat.long .stat-value { text-align: left; font-weight: 600; line-height: 1.45; }
 
   /* Timeline */
   .tl-item { position: relative; padding: 0 0 14px 26px; }
@@ -1869,7 +1872,7 @@ function renderProgram(i) {
   const p = state.programs[i];
   const s = STATUS[p.status] || STATUS.plan;
   const LIST = (rows) => rows.map((row) =>
-    `<div class="stat"><span>${esc(row[0])}</span><span class="stat-value">${esc(row[1])}</span></div>`).join("");
+    `<div class="stat${String(row[1] ?? "").length > 22 ? " long" : ""}"><span>${esc(row[0])}</span><span class="stat-value">${esc(row[1])}</span></div>`).join("");
 
   $("program-body").innerHTML = `
     <div class="prog-head">
@@ -1890,13 +1893,13 @@ function renderProgram(i) {
             <div class="tl-item ${esc(st.state)}">
               <span class="tl-dot"></span>
               <div class="tl-name">${esc(st.name)}</div>
-              <div class="tl-date">${esc(st.date)}</div>
+              ${F(st.date) ? `<div class="tl-date">${esc(st.date)}</div>` : ""}
             </div>`).join("")}
         </div>
       </div>
     </div>
     ${renderCharts(p)}
-    <div class="conclusion"><div class="lbl">Вывод</div>${esc(p.conclusion)}</div>
+    ${F(p.conclusion) ? `<div class="conclusion"><div class="lbl">Вывод</div>${esc(p.conclusion)}</div>` : ""}
     <div id="program-brief"></div>
   `;
   renderBrief($("program-brief"), [i]);
@@ -1910,12 +1913,14 @@ function renderProgram(i) {
     prev.disabled = false;
     prev.innerHTML = `← <b>${String(i).padStart(2, "0")}</b> ${esc(state.programs[i - 1].name)}`;
     prev.onclick = () => go(i - 1);
-  } else { prev.disabled = true; prev.textContent = "—"; prev.onclick = null; }
+    prev.style.visibility = "";
+  } else { prev.disabled = true; prev.textContent = ""; prev.onclick = null; prev.style.visibility = "hidden"; }
   if (i < state.programs.length - 1) {
     next.disabled = false;
     next.innerHTML = `<b>${String(i + 2).padStart(2, "0")}</b> ${esc(state.programs[i + 1].name)} →`;
     next.onclick = () => go(i + 1);
-  } else { next.disabled = true; next.textContent = "—"; next.onclick = null; }
+    next.style.visibility = "";
+  } else { next.disabled = true; next.textContent = ""; next.onclick = null; next.style.visibility = "hidden"; }
 }
 
 /* ---- Редактор программы ---- */
