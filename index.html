@@ -154,6 +154,8 @@
     display: flex; align-items: baseline; gap: 10px;
   }
   .section-title .hint { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .view > .section-title:first-child { margin-top: 0; }
+  #program-brief { margin-top: 16px; }
   .section-title .btn { margin-left: auto; }
 
   /* ================= Summary table ================= */
@@ -210,6 +212,31 @@
   .tl-item.now .tl-date { color: var(--amber); font-weight: 600; }
 
   /* ================= Chart card (для скриншотов) ================= */
+  /* Карточки ключевых показателей на обзоре */
+  .prog-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .pcard {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 16px 15px; cursor: pointer; text-align: left; font: inherit; color: inherit;
+    display: flex; flex-direction: column; gap: 6px; min-height: 132px;
+    transition: border-color .12s ease, box-shadow .12s ease;
+  }
+  .pcard:hover, .pcard:focus-visible { border-color: var(--lime); box-shadow: 0 2px 10px rgba(30,70,52,.08); outline: none; }
+  .pcard-top { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+  .pcard-top .idx { color: var(--muted); font-weight: 500; font-feature-settings: "tnum" 1; }
+  .pcard-value { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--pine); line-height: 1.1; margin-top: auto; font-feature-settings: "tnum" 1; }
+  .pcard-value.empty { color: #B9BFB3; }
+  .pcard-label { font-size: 12px; color: var(--muted); line-height: 1.35; min-height: 2.7em; }
+  .pcard .chip { align-self: flex-start; }
+
+  /* Ход реализации на странице программы */
+  .progress-list { margin: 12px 0 0; padding-left: 0; list-style: none; display: grid; gap: 10px; }
+  .progress-list li { position: relative; padding-left: 18px; font-size: 13.5px; line-height: 1.55; }
+  .progress-list li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 7px; height: 7px; border-radius: 2px; background: var(--lime); }
+
+  /* Свёрнутая выгрузка */
+  .brief-toggle { display: inline-flex; align-items: center; gap: 8px; }
+  .brief-slot { margin-top: 12px; }
+
   .chart-card {
     margin-top: 14px;
     background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
@@ -368,6 +395,9 @@
   @media (max-width: 560px) {
     .kpis { grid-template-columns: 1fr 1fr; gap: 8px; }
     .kpi-value { font-size: 22px; }
+    .prog-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .pcard { padding: 12px; min-height: 118px; }
+    .pcard-value { font-size: 22px; }
     .prog-title { font-size: 21px; }
     th:nth-child(5), td:nth-child(5) { display: none; }
     .edit-row { grid-template-columns: 1fr 80px 80px 28px; }
@@ -420,7 +450,11 @@
 
       <!-- ======= VIEW: Overview ======= -->
       <section class="view" id="view-overview">
-        <div class="kpis" id="kpis"></div>
+        <div class="section-title">
+          Ключевые показатели
+          <span class="hint" id="kpi-hint"></span>
+        </div>
+        <div class="prog-cards" id="kpis"></div>
 
         <div class="section-title">
           Сводная таблица
@@ -429,7 +463,7 @@
         <div class="table-card">
           <table>
             <thead>
-              <tr><th>№</th><th>Программа/проект</th><th>Статус</th><th>Охват</th><th>География</th></tr>
+              <tr><th>№</th><th>Программа/проект</th><th>Текущий этап</th><th>Охват</th><th>География</th></tr>
             </thead>
             <tbody id="summary-body"></tbody>
           </table>
@@ -1477,7 +1511,7 @@ function renderAll(keepScroll) {
   renderNav();
   renderKpis();
   renderSummary();
-  renderBrief($("overview-brief"), state.programs.map((_, i) => i));
+  mountBrief($("overview-brief"), state.programs.map((_, i) => i), "overview");
   applyRoute(keepScroll);
 }
 
@@ -1494,12 +1528,37 @@ function renderNav() {
     </button>`).join("");
 }
 
+/* Главный показатель направления — первая строка «Охват» с заполненным значением */
+function mainMetric(p) {
+  const r = (p.reach || []).find((row) => F(row[1]));
+  return r ? { value: r[1], label: r[0] } : null;
+}
+/* Текущий этап: «в работе», иначе ближайший впереди, иначе отметка о завершении */
+function currentStage(p) {
+  const st = p.stages || [];
+  const now = st.find((x) => x.state === "now");
+  if (now) return now.name;
+  const next = st.find((x) => x.state === "next");
+  if (next) return "Далее: " + next.name;
+  if (st.length && st.every((x) => x.state === "done")) return "Все этапы выполнены";
+  return "—";
+}
+
 function renderKpis() {
   const activeCount = state.programs.filter((p) => p.status === "active").length;
-  $("kpis").innerHTML = `
-    <div class="kpi"><div class="kpi-value num">${state.programs.length}</div><div class="kpi-label">программ/проектов в портфеле</div></div>
-    <div class="kpi accent"><div class="kpi-value num">${activeCount}</div><div class="kpi-label">программ/проектов в активной стадии</div></div>
-  `;
+  $("kpi-hint").textContent = `${state.programs.length} программ/проектов · ${activeCount} в активной стадии · нажмите на карточку, чтобы открыть`;
+  $("kpis").innerHTML = state.programs.map((p, i) => {
+    const m = mainMetric(p);
+    const s = STATUS[p.status] || STATUS.unknown;
+    return `
+    <button class="pcard" type="button" data-card="${i}" aria-label="Открыть: ${esc(p.name)}">
+      <div class="pcard-top"><span class="idx">${String(i + 1).padStart(2, "0")}</span><span>${esc(p.name)}</span></div>
+      ${p.status !== "active" ? `<span class="chip ${s.cls}">${s.label}</span>` : ""}
+      <div class="pcard-value${m ? "" : " empty"}">${m ? esc(m.value) : "—"}</div>
+      <div class="pcard-label">${m ? esc(m.label) : "Показатели уточняются"}</div>
+    </button>`;
+  }).join("");
+  $("kpis").querySelectorAll("[data-card]").forEach((b) => { b.onclick = () => go(+b.dataset.card); });
 }
 
 function renderSummary() {
@@ -1511,7 +1570,7 @@ function renderSummary() {
       <tr data-route="${i}" tabindex="0" role="link" aria-label="Открыть: ${esc(p.name)}">
         <td class="idx">${i + 1}</td>
         <td><b>${esc(p.name)}</b></td>
-        <td><span class="chip ${s.cls}">${s.label}</span></td>
+        <td>${esc(currentStage(p))}</td>
         <td class="v num">${reachMain}</td>
         <td>${geoMain}</td>
       </tr>`;
@@ -1614,6 +1673,22 @@ const FORMATS = {
 };
 
 const BRIEF_KEY = "damu-export-format";
+/* Выгрузка свёрнута по умолчанию: кнопка раскрывает блок; состояние помнится до перезагрузки */
+const briefOpen = new Set();
+function mountBrief(el, idxs, key) {
+  if (!el) return;
+  const open = briefOpen.has(key);
+  el.innerHTML = `
+    <button class="btn brief-toggle" type="button" aria-expanded="${open}">${open ? "▴ Свернуть выгрузку" : "▾ Выгрузить данные: текст, таблица, презентация"}</button>
+    <div class="brief-slot"${open ? "" : " hidden"}></div>`;
+  const slot = el.querySelector(".brief-slot");
+  if (open) renderBrief(slot, idxs);
+  el.querySelector(".brief-toggle").onclick = () => {
+    if (briefOpen.has(key)) briefOpen.delete(key); else briefOpen.add(key);
+    mountBrief(el, idxs, key);
+  };
+}
+
 let briefFmt = (() => { try { return localStorage.getItem(BRIEF_KEY) || "text"; } catch { return "text"; } })();
 
 const FONT = "font-family:Calibri,Arial,sans-serif;";
@@ -1898,11 +1973,13 @@ function renderProgram(i) {
         </div>
       </div>
     </div>
+    ${(p.progress || []).filter(F).length ? `<div class="chart-card"><div class="chart-title">Ход реализации</div>
+      <ul class="progress-list">${p.progress.filter(F).map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>` : ""}
     ${renderCharts(p)}
     ${F(p.conclusion) ? `<div class="conclusion"><div class="lbl">Вывод</div>${esc(p.conclusion)}</div>` : ""}
     <div id="program-brief"></div>
   `;
-  renderBrief($("program-brief"), [i]);
+  mountBrief($("program-brief"), [i], "program");
   const editBtn = $("btn-edit-program");
   if (!EDIT_MODE) editBtn.hidden = true;
   else if (LIVE) { editBtn.textContent = "Редактировать в таблице ↗"; editBtn.onclick = openSheet; }
