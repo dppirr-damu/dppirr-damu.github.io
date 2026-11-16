@@ -237,6 +237,12 @@
   /* Ссылки на фотографии */
   .photo-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
   .photo-link { text-decoration: none; }
+  .photo-box { padding-top: 14px; padding-bottom: 14px; }
+  .photo-box:not([open]) { background: none; border: none; box-shadow: none; padding: 0; }
+  .photo-toggle { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+  .photo-toggle::-webkit-details-marker { display: none; }
+  .photo-box .when-open, .photo-box[open] .when-closed { display: none; }
+  .photo-box[open] .when-open { display: inline; }
   .photo-frame { display: block; width: 100%; height: 380px; border: 1px solid var(--line); border-radius: 8px; margin: 12px 0 10px; background: #fff; }
   @media (max-width: 560px) { .photo-frame { height: 300px; } }
 
@@ -1497,12 +1503,21 @@ function renderPhotos(p) {
       <iframe class="photo-frame" src="https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(id)}#grid"
         title="Фотографии: ${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer"></iframe>
       <a class="btn photo-link" href="https://drive.google.com/drive/folders/${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer">Открыть папку целиком ↗</a>`).join("");
-  return `<div class="chart-card"><div class="chart-title">Фотографии</div>
+  /* Свёрнуто по умолчанию; галерея грузится только после раскрытия */
+  return `<details class="chart-card photo-box" data-name="${esc(p.name)}"${photosOpen.has(p.name) ? " open" : ""}>
+      <summary class="btn photo-toggle"><span class="when-closed">▾ Показать фотографии</span><span class="when-open">▴ Скрыть фотографии</span></summary>
       ${gallery}
       ${others.length ? `<div class="photo-links">${others.map(([t, u]) =>
         `<a class="btn photo-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`).join("")}</div>` : ""}
-    </div>`;
+    </details>`;
 }
+/* Помним, какие галереи раскрыты, чтобы автообновление данных их не сворачивало */
+const photosOpen = new Set();
+document.addEventListener("toggle", (e) => {
+  const d = e.target;
+  if (!(d instanceof HTMLElement) || !d.classList.contains("photo-box")) return;
+  if (d.open) photosOpen.add(d.dataset.name); else photosOpen.delete(d.dataset.name);
+}, true);
 
 const ORDER = [
   "Арманнан Іске",
