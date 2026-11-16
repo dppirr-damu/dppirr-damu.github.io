@@ -2358,10 +2358,12 @@ function parseWorkbook(wb, X) {
     const m = sheetName.match(/^\s*(\d{1,2})\s*(.*)$/);
     if (!m) return;
     const p = { name: m[2].trim() || sheetName, status: "unknown", desc: "", reach: [], geo: [], stages: [], conclusion: "", progress: [], charts: [], photos: [] };
+    let named = false;
     rows.forEach((r, k) => {
       const sec = norm(r[0]);
       const b = cellText(r[1]), c = cellText(r[2]), d = cellText(r[3]);
-      if (sec === "название" && b) p.name = b;
+      /* Название берётся из первой строки «Название»; случайные повторы ниже не переименовывают программу */
+      if (sec === "название" && b) { if (!named) { p.name = b; named = true; } }
       else if (sec === "статус") p.status = STATUS_IN[norm(b)] || "unknown";
       else if (sec === "описание") p.desc = b;
       else if (sec === "охват" && b) p.reach.push([b, dash(c), dash(d)]);
