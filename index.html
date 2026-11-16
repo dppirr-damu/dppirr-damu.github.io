@@ -2372,10 +2372,14 @@ function fixDates(ws, X) {
     }
   }
 }
-function cellText(v) {
+/* Числа — с разделителем разрядов (3 076). Число, введённое как текст («3076»),
+   оформляется так же. plain = true — без разрядов (годы и даты этапов: 2027). */
+function cellText(v, plain) {
   if (v === null || v === undefined) return "";
-  if (typeof v === "number") return v.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
-  return String(v).trim();
+  if (typeof v === "number") return plain ? String(v) : v.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
+  const t = String(v).trim();
+  if (!plain && /^\d{4,}$/.test(t)) return Number(t).toLocaleString("ru-RU");
+  return t;
 }
 
 function parseWorkbook(wb, X) {
@@ -2413,7 +2417,7 @@ function parseWorkbook(wb, X) {
       else if (sec === "описание") p.desc = b;
       else if (sec === "охват" && b) p.reach.push([b, dash(c), dash(d)]);
       else if (sec === "география" && b) p.geo.push([b, dash(c)]);
-      else if (sec === "этап" && b) p.stages.push({ name: b, state: STAGE_IN[norm(c)] || "next", date: dash(d) });
+      else if (sec === "этап" && b) p.stages.push({ name: b, state: STAGE_IN[norm(c)] || "next", date: dash(cellText(r[3], true)) });
       else if (sec === "вывод") p.conclusion = b;
       else if (sec === "ход реализации" && b) p.progress.push(b);
       else if (sec === "фото" || sec === "фотографии") {
