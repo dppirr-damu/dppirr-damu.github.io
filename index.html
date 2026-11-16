@@ -440,7 +440,7 @@
 
         <div class="section-title">
           О панели
-          <button class="btn small" id="btn-edit-overview" type="button">Изменить дату и сводные KPI</button>
+          <button class="btn small" id="btn-edit-overview" type="button">Изменить дату</button>
         </div>
         <div class="panel" id="about-panel" style="max-width:72ch; font-size:13px; color:#3C4238;">
           Единая точка доступа к статусу программ нефинансовой поддержки для совещаний,
@@ -826,9 +826,7 @@ function renderKpis() {
   const activeCount = state.programs.filter((p) => p.status === "active").length;
   $("kpis").innerHTML = `
     <div class="kpi"><div class="kpi-value num">${state.programs.length}</div><div class="kpi-label">программ в портфеле</div></div>
-    <div class="kpi accent"><div class="kpi-value num">${esc(state.kpi.participants)}</div><div class="kpi-label">участников всего (2026)</div></div>
-    <div class="kpi"><div class="kpi-value num">${esc(state.kpi.regions)}</div><div class="kpi-label">регионов охвата</div></div>
-    <div class="kpi"><div class="kpi-value num">${activeCount}</div><div class="kpi-label">программ в активной стадии</div></div>
+    <div class="kpi accent"><div class="kpi-value num">${activeCount}</div><div class="kpi-label">программ в активной стадии</div></div>
   `;
 }
 
@@ -1357,10 +1355,6 @@ $("btn-edit-overview").onclick = () => {
     <div class="editor" style="max-width:520px;">
       <div class="field"><label>Дата актуальности данных</label>
         <input type="text" id="ed-date" value="${esc(state.date)}" placeholder="дд.мм.гггг"></div>
-      <div class="field"><label>Участников всего (2026)</label>
-        <input type="text" id="ed-kpi-participants" value="${esc(state.kpi.participants)}"></div>
-      <div class="field"><label>Регионов охвата</label>
-        <input type="text" id="ed-kpi-regions" value="${esc(state.kpi.regions)}"></div>
       <div class="editor-actions">
         <button class="btn primary" id="ed-ov-save" type="button">Сохранить</button>
         <button class="btn" id="ed-ov-cancel" type="button">Отмена</button>
@@ -1370,10 +1364,8 @@ $("btn-edit-overview").onclick = () => {
   $("ed-ov-cancel").onclick = () => { slot.innerHTML = ""; };
   $("ed-ov-save").onclick = () => {
     state.date = $("ed-date").value.trim() || "—";
-    state.kpi.participants = $("ed-kpi-participants").value.trim() || "—";
-    state.kpi.regions = $("ed-kpi-regions").value.trim() || "—";
     saveState(); slot.innerHTML = ""; renderAll();
-    toast("Сводные показатели обновлены");
+    toast("Дата актуальности обновлена");
   };
   $("ed-ov-reset").onclick = () => {
     if (!confirm("Удалить все данные, внесённые в этом браузере, и вернуться к значениям из HTML-файла?")) return;
