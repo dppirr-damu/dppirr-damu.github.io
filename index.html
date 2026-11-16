@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Фонд «Даму» — Пульт нефинансовой поддержки</title>
+<title>ДППиРР — Пульт нефинансовой поддержки</title>
 <meta name="description" content="Статус программ/проектов нефинансовой поддержки предпринимателей: охват, география, этапы, диаграммы факт/план. Обновляется еженедельно.">
-<meta property="og:title" content="Фонд «Даму» — Пульт нефинансовой поддержки">
+<meta property="og:title" content="ДППиРР — Пульт нефинансовой поддержки">
 <meta property="og:description" content="Статус программ/проектов нефинансовой поддержки: показатели, география, этапы и диаграммы. Актуальные данные для совещаний и презентаций.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
@@ -1590,7 +1590,7 @@ let briefFmt = (() => { try { return localStorage.getItem(BRIEF_KEY) || "text"; 
 const FONT = "font-family:Calibri,Arial,sans-serif;";
 function briefHTML(m, title) {
   const P = (inner, extra = "") => `<p style="${FONT}font-size:11pt;margin:0 0 6px;${extra}">${inner}</p>`;
-  let h = P(`<b>${esc(title)}</b>`, "font-size:13pt") + P(`Данные на ${esc(state.date)} · Фонд «Даму»`, "color:#666;font-size:9.5pt;margin-bottom:12px");
+  let h = P(`<b>${esc(title)}</b>`, "font-size:13pt") + P(`Данные на ${esc(state.date)} · ДППиРР`, "color:#666;font-size:9.5pt;margin-bottom:12px");
   if (m.type === "table") {
     const TH = `style="${FONT}font-size:10pt;border:1px solid #8A9386;background:#1E4634;color:#fff;padding:4px 6px;text-align:left"`;
     const TD = `style="${FONT}font-size:10pt;border:1px solid #8A9386;padding:4px 6px;vertical-align:top"`;
@@ -1605,7 +1605,7 @@ function briefHTML(m, title) {
   return h;
 }
 function briefText(m, title) {
-  const out = [title, `Данные на ${state.date} · Фонд «Даму»`, ""];
+  const out = [title, `Данные на ${state.date} · ДППиРР`, ""];
   if (m.type === "table") {
     out.push(m.head.join("\t"));
     m.rows.forEach((r) => out.push(r.join("\t")));
@@ -1641,7 +1641,7 @@ function previewSlides(ps) {
   return `<div class="slides">${slidePlan(ps).map((s) => {
     if (s.kind === "title") return `<div class="slide sl-cover"><div class="sl-acc"></div>
       <div class="sl-big">${esc(single ? ps[0].p.name : DOC_TITLE)}</div>
-      <div class="sl-sub">Статус реализации · данные на ${esc(state.date)}</div><div class="sl-org">Фонд развития предпринимательства «Даму»</div></div>`;
+      <div class="sl-sub">Статус реализации · данные на ${esc(state.date)}</div><div class="sl-org">ДППиРР</div></div>`;
     if (s.kind === "overview") return `<div class="slide"><div class="sl-head">Портфель программ/проектов</div><div class="sl-body">
       <table class="sl-tbl">${ps.map(({ p, n }) => `<tr><td>${n}</td><td>${esc(p.name)}</td><td>${esc(statusOf(p))}</td><td>${esc(figs(p)[0] || "—")}</td></tr>`).join("")}</table></div></div>`;
     const p = s.p;
@@ -1676,7 +1676,7 @@ async function downloadPptx(ps, filename) {
   const pptx = new Pptx();
   pptx.layout = "LAYOUT_WIDE";   // 13,33 × 7,5 дюйма
   pptx.title = DOC_TITLE;
-  pptx.company = "Фонд «Даму»";
+  pptx.company = "ДППиРР";
   const FONT_FACE = "Calibri";
   const B = BRAND;
   pptx.defineSlideMaster({
@@ -1685,7 +1685,7 @@ async function downloadPptx(ps, filename) {
     objects: [
       { rect: { x: 0, y: 0, w: 13.33, h: 0.95, fill: { color: B.pine } } },
       { rect: { x: 0, y: 0.95, w: 13.33, h: 0.06, fill: { color: B.lime } } },
-      { text: { text: `Фонд «Даму» · данные на ${state.date}`, options: { x: 0.5, y: 7.05, w: 8, h: 0.3, fontFace: FONT_FACE, fontSize: 9, color: B.muted } } },
+      { text: { text: `ДППиРР · данные на ${state.date}`, options: { x: 0.5, y: 7.05, w: 8, h: 0.3, fontFace: FONT_FACE, fontSize: 9, color: B.muted } } },
     ],
     slideNumber: { x: 12.4, y: 7.05, w: 0.5, h: 0.3, fontFace: FONT_FACE, fontSize: 9, color: B.muted },
   });
@@ -1711,7 +1711,7 @@ async function downloadPptx(ps, filename) {
       s.addShape(pptx.ShapeType.rect, { x: 0.8, y: 2.35, w: 0.12, h: 2.2, fill: { color: B.lime }, line: { color: B.lime } });
       s.addText(single ? ps[0].p.name : DOC_TITLE, { x: 1.2, y: 2.2, w: 11, h: 1.6, fontFace: FONT_FACE, fontSize: 36, bold: true, color: "FFFFFF", valign: "top", fit: "shrink" });
       s.addText(`Статус реализации · данные на ${state.date}`, { x: 1.2, y: 3.85, w: 11, h: 0.5, fontFace: FONT_FACE, fontSize: 18, color: "C9E3B0" });
-      s.addText("Фонд развития предпринимательства «Даму»", { x: 1.2, y: 6.5, w: 11, h: 0.4, fontFace: FONT_FACE, fontSize: 12, color: "C9CFC4" });
+      s.addText("ДППиРР", { x: 1.2, y: 6.5, w: 11, h: 0.4, fontFace: FONT_FACE, fontSize: 12, color: "C9CFC4" });
       return;
     }
     const s = pptx.addSlide({ masterName: "DAMU" });
@@ -1753,7 +1753,7 @@ async function downloadPptx(ps, filename) {
 async function downloadXlsx(m, title, filename) {
   const X = await loadXlsxLib();
   const num = (v) => /^-?\d[\d\s ]*([.,]\d+)?$/.test(String(v).trim()) ? parseNum(v) : v;
-  const aoa = [[title], [`Данные на ${state.date} · Фонд «Даму»`], [], m.head, ...m.rows.map((r) => r.map(num))];
+  const aoa = [[title], [`Данные на ${state.date} · ДППиРР`], [], m.head, ...m.rows.map((r) => r.map(num))];
   const ws = X.utils.aoa_to_sheet(aoa);
   ws["!cols"] = m.head.map((h) => ({ wch: h === "№" ? 5 : h === "Значение" ? 16 : h === "Программа/проект" ? 34 : 36 }));
   const wb = X.utils.book_new();
@@ -1796,7 +1796,7 @@ function renderBrief(el, idxs) {
   const ps = idxs.map((i) => ({ p: state.programs[i], n: i + 1 }));
   const m = FORMATS[fmtKey].build(ps, single);
   const title = single ? ps[0].p.name : DOC_TITLE;
-  const base = ((single ? ps[0].p.name : "Даму_программы") + "_" + String(state.date).replace(/[^\d.]/g, ""))
+  const base = ((single ? ps[0].p.name : "ДППиРР_программы") + "_" + String(state.date).replace(/[^\d.]/g, ""))
     .replace(/[\\/:*?"<>|«»]/g, "").replace(/\s+/g, "_");
   const isSlides = m.type === "slides";
   const html = isSlides ? "" : briefHTML(m, title);
@@ -2090,10 +2090,10 @@ function applyRoute(keepScroll) {
   if (isProg) {
     renderProgram(+m[1]);
     $("view-title").textContent = state.programs[+m[1]].name;
-    document.title = state.programs[+m[1]].name + " — Фонд «Даму»";
+    document.title = state.programs[+m[1]].name + " — ДППиРР";
   } else {
     $("view-title").textContent = "Обзор портфеля";
-    document.title = "Фонд «Даму» — Пульт нефинансовой поддержки";
+    document.title = "ДППиРР — Пульт нефинансовой поддержки";
   }
   closeSide();
   if (!keepScroll) window.scrollTo(0, 0);
