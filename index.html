@@ -234,6 +234,10 @@
   .progress-list li { position: relative; padding-left: 18px; font-size: 13.5px; line-height: 1.55; }
   .progress-list li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 7px; height: 7px; border-radius: 2px; background: var(--lime); }
 
+  /* Ссылки на фотографии */
+  .photo-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .photo-link { text-decoration: none; }
+
   /* Свёрнутая выгрузка */
   .brief-toggle { display: inline-flex; align-items: center; gap: 8px; }
   .brief-slot { margin-top: 12px; }
@@ -1976,6 +1980,9 @@ function renderProgram(i) {
     </div>
     ${(p.progress || []).filter(F).length ? `<div class="chart-card"><div class="chart-title">Ход реализации</div>
       <ul class="progress-list">${p.progress.filter(F).map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>` : ""}
+    ${(p.photos || []).length ? `<div class="chart-card"><div class="chart-title">Фотографии</div>
+      <div class="photo-links">${p.photos.filter(([, u]) => /^https?:\/\//i.test(u)).map(([t, u]) =>
+        `<a class="btn photo-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`).join("")}</div></div>` : ""}
     ${renderCharts(p)}
     ${F(p.conclusion) ? `<div class="conclusion"><div class="lbl">Вывод</div>${esc(p.conclusion)}</div>` : ""}
     <div id="program-brief"></div>
@@ -2283,7 +2290,13 @@ function parseWorkbook(wb, X) {
   wb.SheetNames.forEach((sheetName) => {
     const ws = wb.Sheets[sheetName];
     fixDates(ws, X);
-    const rows = X.utils.sheet_to_json(ws, { header: 1, defval: "", raw: true, blankrows: false });
+    const rows = X.utils.sheet_to_json(ws, { header: 1, defval: "", raw: true, blankrows: true });
+    const r0 = ws["!ref"] ? X.utils.decode_range(ws["!ref"]).s.r : 0;
+    /* Ссылка из ячейки: гиперссылка (Вставка → Ссылка) или сам текст-адрес */
+    const linkAt = (k, c) => {
+      const cell = ws[X.utils.encode_cell({ r: r0 + k, c })];
+      return cell && cell.l && cell.l.Target ? String(cell.l.Target).trim() : "";
+    };
     if (norm(sheetName) === "сводка") {
       rows.forEach((r) => {
         const k = norm(r[0]), v = dash(cellText(r[1]));
@@ -2295,8 +2308,8 @@ function parseWorkbook(wb, X) {
     }
     const m = sheetName.match(/^\s*(\d{1,2})\s*(.*)$/);
     if (!m) return;
-    const p = { name: m[2].trim() || sheetName, status: "unknown", desc: "", reach: [], geo: [], stages: [], conclusion: "", progress: [], charts: [] };
-    rows.forEach((r) => {
+    const p = { name: m[2].trim() || sheetName, status: "unknown", desc: "", reach: [], geo: [], stages: [], conclusion: "", progress: [], charts: [], photos: [] };
+    rows.forEach((r, k) => {
       const sec = norm(r[0]);
       const b = cellText(r[1]), c = cellText(r[2]), d = cellText(r[3]);
       if (sec === "название" && b) p.name = b;
@@ -2307,6 +2320,11 @@ function parseWorkbook(wb, X) {
       else if (sec === "этап" && b) p.stages.push({ name: b, state: STAGE_IN[norm(c)] || "next", date: dash(d) });
       else if (sec === "вывод") p.conclusion = b;
       else if (sec === "ход реализации" && b) p.progress.push(b);
+      else if (sec === "фото" || sec === "фотографии") {
+        /* B — подпись, C — ссылка; ссылка может быть гиперссылкой в B или C */
+        const url = [c, linkAt(k, 2), linkAt(k, 1), b].find((v) => /^https?:\/\//i.test(String(v || "").trim()));
+        if (url) p.photos.push([b && !/^https?:\/\//i.test(b) ? b : "Фотографии", String(url).trim()]);
+      }
       else if ((sec === "диаграмма" || sec === "диаграмма регионов") && b) p.charts.push({ title: b, items: [] });
       else if ((sec === "разрез" || sec === "регион") && b) {
         if (!p.charts.length) p.charts.push({ title: "", items: [] });
