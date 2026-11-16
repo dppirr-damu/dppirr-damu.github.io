@@ -237,6 +237,8 @@
   /* Ссылки на фотографии */
   .photo-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
   .photo-link { text-decoration: none; }
+  .photo-frame { display: block; width: 100%; height: 380px; border: 1px solid var(--line); border-radius: 8px; margin: 12px 0 10px; background: #fff; }
+  @media (max-width: 560px) { .photo-frame { height: 300px; } }
 
   /* Свёрнутая выгрузка */
   .brief-toggle { display: inline-flex; align-items: center; gap: 8px; }
@@ -1468,6 +1470,40 @@ let cached = LIVE ? loadCache() : null;
    Сопоставление по названию (строка «Название» в таблице).
    Направления, которых нет в списке, идут после — в порядке листов таблицы.
    ============================================================ */
+/* ============================================================
+   ФОТОГРАФИИ: папки Google Диска по программам/проектам.
+   Общая папка «Фото по проектам» (доступ: все, у кого есть ссылка — читатель):
+   https://drive.google.com/drive/folders/1-rWauGOqjzEZZInRhkTHfn40NPrm_N7S
+   Подпапка программы показывается на её странице галереей.
+   Новую подпапку можно подключить без правки кода: строка «Фото» в таблице
+   со ссылкой на подпапку (колонка C).
+   ============================================================ */
+const PHOTO_FOLDERS = {
+  "Арманнан Іске": "1wz0Rx9kft9pVZL2wawhytt2Wb24cTlVJ",
+  "Дни открытых дверей": "1tcFJq1H_70cgG3wxdq7SFmDUeZzrN9mk",
+};
+const driveFolderId = (u) => {
+  const m = String(u || "").match(/^https:\/\/drive\.google\.com\/(?:drive\/(?:u\/\d+\/)?folders\/|open\?id=)([\w-]{10,})/i);
+  return m ? m[1] : "";
+};
+function renderPhotos(p) {
+  const links = (p.photos || []).filter(([, u]) => /^https?:\/\//i.test(u));
+  const folders = [];
+  if (PHOTO_FOLDERS[p.name]) folders.push(PHOTO_FOLDERS[p.name]);
+  links.forEach(([, u]) => { const id = driveFolderId(u); if (id && !folders.includes(id)) folders.push(id); });
+  const others = links.filter(([, u]) => !driveFolderId(u));
+  if (!folders.length && !others.length) return "";
+  const gallery = folders.map((id) => `
+      <iframe class="photo-frame" src="https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(id)}#grid"
+        title="Фотографии: ${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer"></iframe>
+      <a class="btn photo-link" href="https://drive.google.com/drive/folders/${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer">Открыть папку целиком ↗</a>`).join("");
+  return `<div class="chart-card"><div class="chart-title">Фотографии</div>
+      ${gallery}
+      ${others.length ? `<div class="photo-links">${others.map(([t, u]) =>
+        `<a class="btn photo-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`).join("")}</div>` : ""}
+    </div>`;
+}
+
 const ORDER = [
   "Арманнан Іске",
   "Онлайн-курсы",
@@ -1980,9 +2016,7 @@ function renderProgram(i) {
     </div>
     ${(p.progress || []).filter(F).length ? `<div class="chart-card"><div class="chart-title">Ход реализации</div>
       <ul class="progress-list">${p.progress.filter(F).map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>` : ""}
-    ${(p.photos || []).length ? `<div class="chart-card"><div class="chart-title">Фотографии</div>
-      <div class="photo-links">${p.photos.filter(([, u]) => /^https?:\/\//i.test(u)).map(([t, u]) =>
-        `<a class="btn photo-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`).join("")}</div></div>` : ""}
+    ${renderPhotos(p)}
     ${renderCharts(p)}
     ${F(p.conclusion) ? `<div class="conclusion"><div class="lbl">Вывод</div>${esc(p.conclusion)}</div>` : ""}
     <div id="program-brief"></div>
