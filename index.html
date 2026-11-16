@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Фонд «Даму» — Пульт нефинансовой поддержки</title>
-<meta name="description" content="Статус 11 программ нефинансовой поддержки предпринимателей: охват, география, этапы, диаграммы факт/план. Обновляется еженедельно.">
+<meta name="description" content="Статус программ и проектов нефинансовой поддержки предпринимателей: охват, география, этапы, диаграммы факт/план. Обновляется еженедельно.">
 <meta property="og:title" content="Фонд «Даму» — Пульт нефинансовой поддержки">
-<meta property="og:description" content="Статус 11 программ нефинансовой поддержки: показатели, география, этапы и диаграммы. Актуальные данные для совещаний и презентаций.">
+<meta property="og:description" content="Статус программ и проектов нефинансовой поддержки: показатели, география, этапы и диаграммы. Актуальные данные для совещаний и презентаций.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
 <style>
@@ -168,6 +168,11 @@
   td.v { white-space: nowrap; }
 
   /* ================= Status chips ================= */
+  .kind-tag {
+    display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; color: var(--muted); border: 1px solid var(--line, #DDE1D8);
+    vertical-align: 1px;
+  }
   .chip {
     display: inline-flex; align-items: center; gap: 6px;
     font-size: 12px; font-weight: 600; border-radius: 20px; padding: 3px 11px;
@@ -421,12 +426,12 @@
 
         <div class="section-title">
           Сводная таблица
-          <span class="hint">нажмите на строку, чтобы открыть программу</span>
+          <span class="hint">нажмите на строку, чтобы открыть программу или проект</span>
         </div>
         <div class="table-card">
           <table>
             <thead>
-              <tr><th>№</th><th>Программа</th><th>Статус</th><th>Охват</th><th>География</th></tr>
+              <tr><th>№</th><th>Программа / проект</th><th>Статус</th><th>Охват</th><th>География</th></tr>
             </thead>
             <tbody id="summary-body"></tbody>
           </table>
@@ -434,7 +439,7 @@
 
         <div class="section-title">
           Выгрузка данных
-          <span class="hint">текст, таблица или презентация — по всем программам</span>
+          <span class="hint">текст, таблица или презентация — по всем программам и проектам</span>
         </div>
         <div id="overview-brief"></div>
 
@@ -717,6 +722,7 @@ const DEFAULT_DATA = {
     },
     {
       name: "Дни открытых дверей",
+      kind: "project",
       status: "unknown",
       desc: "Дни открытых дверей Фонда для предпринимателей.",
       reach: [["Проведено мероприятий", "—", "—"], ["Участников", "—", "—"]],
@@ -738,6 +744,23 @@ const STATUS = {
   unknown: { label: "Статус не указан", cls: "c-plan"    },
 };
 const STAGE_LABEL = { done: "Выполнен", now: "В работе", next: "Впереди" };
+
+/* Тип направления: программа или проект (поле kind, в таблице — строка «Тип»). */
+const isProject = (p) => p.kind === "project";
+const kindName = (p) => (isProject(p) ? "Проект" : "Программа");
+function plural(n, one, few, many) {
+  const a = Math.abs(n) % 100, b = a % 10;
+  if (a > 10 && a < 20) return many;
+  if (b > 1 && b < 5) return few;
+  if (b === 1) return one;
+  return many;
+}
+/* Номер направления среди своего типа: «Программа 03 из 10», «Проект 01 из 01». */
+function kindPos(i) {
+  const p = state.programs[i];
+  const same = state.programs.map((q, k) => [q, k]).filter(([q]) => isProject(q) === isProject(p));
+  return { n: same.findIndex(([, k]) => k === i) + 1, total: same.length };
+}
 const STORE_KEY = "damu-panel-v2";
 
 /* ============================================================
@@ -815,18 +838,24 @@ function renderNav() {
     <div class="nav-label">Портфель</div>
     <button class="nav-item" data-route="overview" type="button"><span class="idx">Σ</span><span>Обзор</span></button>
     <div class="nav-divider"></div>
-    <div class="nav-label">Программы</div>
-  ` + state.programs.map((p, i) => `
+  ` + [["Программы", false], ["Проекты", true]].map(([label, proj]) => {
+    const items = state.programs.map((p, i) => [p, i]).filter(([p]) => isProject(p) === proj);
+    if (!items.length) return "";
+    return `<div class="nav-label">${label}</div>` + items.map(([p, i], k) => `
     <button class="nav-item" data-route="${i}" type="button">
-      <span class="idx">${String(i + 1).padStart(2, "0")}</span><span>${esc(p.name)}</span>
+      <span class="idx">${String(k + 1).padStart(2, "0")}</span><span>${esc(p.name)}</span>
     </button>`).join("");
+  }).join(`<div class="nav-divider"></div>`);
 }
 
 function renderKpis() {
-  const activeCount = state.programs.filter((p) => p.status === "active").length;
+  const progs = state.programs.filter((p) => !isProject(p));
+  const projs = state.programs.filter(isProject);
+  const activeCount = progs.filter((p) => p.status === "active").length;
   $("kpis").innerHTML = `
-    <div class="kpi"><div class="kpi-value num">${state.programs.length}</div><div class="kpi-label">программ в портфеле</div></div>
-    <div class="kpi accent"><div class="kpi-value num">${activeCount}</div><div class="kpi-label">программ в активной стадии</div></div>
+    <div class="kpi"><div class="kpi-value num">${progs.length}</div><div class="kpi-label">${plural(progs.length, "программа", "программы", "программ")} в портфеле</div></div>
+    <div class="kpi accent"><div class="kpi-value num">${activeCount}</div><div class="kpi-label">${plural(activeCount, "программа", "программы", "программ")} в активной стадии</div></div>
+    ${projs.length ? `<div class="kpi"><div class="kpi-value num">${projs.length}</div><div class="kpi-label">${plural(projs.length, "проект", "проекта", "проектов")}</div></div>` : ""}
   `;
 }
 
@@ -838,7 +867,7 @@ function renderSummary() {
     return `
       <tr data-route="${i}" tabindex="0" role="link" aria-label="Открыть: ${esc(p.name)}">
         <td class="idx">${i + 1}</td>
-        <td><b>${esc(p.name)}</b></td>
+        <td><b>${esc(p.name)}</b>${isProject(p) ? ` <span class="kind-tag">проект</span>` : ""}</td>
         <td><span class="chip ${s.cls}">${s.label}</span></td>
         <td class="v num">${reachMain}</td>
         <td>${geoMain}</td>
@@ -895,7 +924,7 @@ function renderCharts(p) {
    ============================================================ */
 const figs = (p) => p.reach.filter((r) => F(r[1])).map((r) => `${r[0]} — ${r[1]}`);
 const BRAND = { pine: "1E4634", green: "2E7D4F", lime: "7CB342", ink: "20241F", muted: "6B7268", paper: "F7F8F5", line: "E0E4DD", mint: "EAF4EC" };
-const DOC_TITLE = "Программы нефинансовой поддержки Фонда «Даму»";
+const DOC_TITLE = "Программы и проекты нефинансовой поддержки Фонда «Даму»";
 
 function tableRows(ps, single) {
   const rows = [];
@@ -906,7 +935,7 @@ function tableRows(ps, single) {
     chartsOf(p).forEach((c) => c.items.forEach((o) => own.push([c.title, o.n, o.raw])));
     own.forEach((r, k) => rows.push(single ? r : [k === 0 ? String(n) : "", k === 0 ? p.name : "", ...r]));
   });
-  return { head: single ? ["Раздел", "Показатель", "Значение"] : ["№", "Программа", "Раздел", "Показатель", "Значение"], rows };
+  return { head: single ? ["Раздел", "Показатель", "Значение"] : ["№", "Программа / проект", "Раздел", "Показатель", "Значение"], rows };
 }
 
 const FORMATS = {
@@ -936,7 +965,7 @@ const FORMATS = {
   },
   slides: {
     label: "Данные в презентации",
-    hint: "Слайды в зелёных цветах Фонда: титульный, сводный и по слайду на программу с ключевыми цифрами и диаграммой.",
+    hint: "Слайды в зелёных цветах Фонда: титульный, сводный и по слайду на программу или проект с ключевыми цифрами и диаграммой.",
     build(ps) { return { type: "slides", ps }; },
   },
 };
@@ -999,7 +1028,7 @@ function previewSlides(ps) {
     if (s.kind === "title") return `<div class="slide sl-cover"><div class="sl-acc"></div>
       <div class="sl-big">${esc(single ? ps[0].p.name : DOC_TITLE)}</div>
       <div class="sl-sub">Статус реализации · данные на ${esc(state.date)}</div><div class="sl-org">Фонд развития предпринимательства «Даму»</div></div>`;
-    if (s.kind === "overview") return `<div class="slide"><div class="sl-head">Портфель программ</div><div class="sl-body">
+    if (s.kind === "overview") return `<div class="slide"><div class="sl-head">Портфель программ и проектов</div><div class="sl-body">
       <table class="sl-tbl">${ps.map(({ p, n }) => `<tr><td>${n}</td><td>${esc(p.name)}</td><td>${esc(statusOf(p))}</td><td>${esc(figs(p)[0] || "—")}</td></tr>`).join("")}</table></div></div>`;
     const p = s.p;
     if (s.kind === "chart") return `<div class="slide"><div class="sl-head">${esc(p.name)}</div><div class="sl-body">${bars(s.chart)}</div></div>`;
@@ -1073,8 +1102,8 @@ async function downloadPptx(ps, filename) {
     }
     const s = pptx.addSlide({ masterName: "DAMU" });
     if (sp.kind === "overview") {
-      head(s, "Портфель программ");
-      const hdr = ["№", "Программа", "Статус", "Ключевой показатель"].map((t) => ({ text: t, options: { bold: true, color: "FFFFFF", fill: { color: B.pine } } }));
+      head(s, "Портфель программ и проектов");
+      const hdr = ["№", "Программа / проект", "Статус", "Ключевой показатель"].map((t) => ({ text: t, options: { bold: true, color: "FFFFFF", fill: { color: B.pine } } }));
       const body = ps.map(({ p, n }, k) => [String(n), p.name, statusOf(p), figs(p)[0] || "—"].map((t) => ({ text: t, options: { fill: { color: k % 2 ? "FFFFFF" : B.paper } } })));
       s.addTable([hdr, ...body], { x: 0.5, y: 1.3, w: 12.3, colW: [0.6, 4.4, 2.0, 5.3], fontFace: FONT_FACE, fontSize: 11, color: B.ink, border: { type: "solid", pt: 0.5, color: B.line }, valign: "middle", rowH: 0.42 });
       return;
@@ -1097,7 +1126,7 @@ async function downloadPptx(ps, filename) {
     }
     const pts = (p.progress || []).filter(F).slice(0, 5);
     const left = { x: 0.5, y, w: sp.chart ? 6.0 : 12.3, h: 6.85 - y };
-    s.addText(pts.length ? "Ход реализации" : "О программе", { x: left.x, y: left.y, w: left.w, h: 0.4, fontFace: FONT_FACE, fontSize: 14, bold: true, color: B.ink });
+    s.addText(pts.length ? "Ход реализации" : (isProject(p) ? "О проекте" : "О программе"), { x: left.x, y: left.y, w: left.w, h: 0.4, fontFace: FONT_FACE, fontSize: 14, bold: true, color: B.ink });
     s.addText(pts.length ? pts.map((t) => ({ text: t, options: { bullet: { code: "25A0" }, breakLine: true, paraSpaceAfter: 6 } }))
                          : [{ text: p.desc || "—" }, ...(F(p.conclusion) ? [{ text: "\n" + p.conclusion, options: { italic: true, color: B.green } }] : [])],
       { x: left.x, y: left.y + 0.45, w: left.w, h: left.h - 0.45, fontFace: FONT_FACE, fontSize: 12, color: B.ink, valign: "top", fit: "shrink" });
@@ -1112,7 +1141,7 @@ async function downloadXlsx(m, title, filename) {
   const num = (v) => /^-?\d[\d\s ]*([.,]\d+)?$/.test(String(v).trim()) ? parseNum(v) : v;
   const aoa = [[title], [`Данные на ${state.date} · Фонд «Даму»`], [], m.head, ...m.rows.map((r) => r.map(num))];
   const ws = X.utils.aoa_to_sheet(aoa);
-  ws["!cols"] = m.head.map((h) => ({ wch: h === "№" ? 5 : h === "Значение" ? 16 : h === "Программа" ? 34 : 36 }));
+  ws["!cols"] = m.head.map((h) => ({ wch: h === "№" ? 5 : h === "Значение" ? 16 : h === "Программа / проект" ? 34 : 36 }));
   const wb = X.utils.book_new();
   X.utils.book_append_sheet(wb, ws, "Данные");
   X.writeFile(wb, filename);
@@ -1164,7 +1193,7 @@ function renderBrief(el, idxs) {
                           : `<button class="btn" type="button" data-act="doc">Скачать для Word</button>`);
   el.innerHTML = `
     <div class="brief">
-      <div class="chart-title">${single ? "Выгрузка данных по программе" : "Выгрузка данных по всем программам"}</div>
+      <div class="chart-title">${single ? (isProject(ps[0].p) ? "Выгрузка данных по проекту" : "Выгрузка данных по программе") : "Выгрузка данных по всем программам и проектам"}</div>
       <div class="chart-sub">${esc(FORMATS[fmtKey].hint)}</div>
       <div class="tabs" role="tablist">${Object.entries(FORMATS).map(([k, v]) =>
         `<button class="tab" role="tab" type="button" data-fmt="${k}" aria-selected="${k === fmtKey}">${v.label}</button>`).join("")}</div>
@@ -1204,7 +1233,7 @@ function renderProgram(i) {
 
   $("program-body").innerHTML = `
     <div class="prog-head">
-      <div class="prog-kicker">Программа ${String(i + 1).padStart(2, "0")} из ${String(state.programs.length).padStart(2, "0")}</div>
+      <div class="prog-kicker">${kindName(p)} ${String(kindPos(i).n).padStart(2, "0")} из ${String(kindPos(i).total).padStart(2, "0")}</div>
       <div class="prog-title-row">
         <div class="prog-title">${esc(p.name)}</div>
         <span class="chip ${s.cls}">${s.label}</span>
@@ -1549,6 +1578,7 @@ function parseWorkbook(wb, X) {
       const b = cellText(r[1]), c = cellText(r[2]), d = cellText(r[3]);
       if (sec === "название" && b) p.name = b;
       else if (sec === "статус") p.status = STATUS_IN[norm(b)] || "unknown";
+      else if (sec === "тип") p.kind = norm(b).startsWith("проект") ? "project" : "program";
       else if (sec === "описание") p.desc = b;
       else if (sec === "охват" && b) p.reach.push([b, dash(c), dash(d)]);
       else if (sec === "география" && b) p.geo.push([b, dash(c)]);
@@ -1561,6 +1591,10 @@ function parseWorkbook(wb, X) {
         p.charts[p.charts.length - 1].items.push([b, dash(c)]);
       }
     });
+    if (!p.kind) {
+      const known = DEFAULT_DATA.programs.find((q) => norm(q.name) === norm(p.name));
+      if (known && known.kind) p.kind = known.kind;
+    }
     progs.push({ n: +m[1], p });
   });
   if (!progs.length) throw new Error("no-programs");
