@@ -243,6 +243,10 @@
   .photo-toggle::-webkit-details-marker { display: none; }
   .photo-box .when-open, .photo-box[open] .when-closed { display: none; }
   .photo-box[open] .when-open { display: inline; }
+  .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 12px 0 10px; }
+  .photo-thumb { display: block; aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden; background: var(--track); border: 1px solid var(--line); }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .2s ease; }
+  .photo-thumb:hover img { transform: scale(1.04); }
   .photo-frame { display: block; width: 100%; height: 380px; border: 1px solid var(--line); border-radius: 8px; margin: 12px 0 10px; background: #fff; }
   @media (max-width: 560px) { .photo-frame { height: 300px; } }
 
@@ -544,6 +548,9 @@ const SHEET = {
   pubUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vThYFCL7MSgV9adFpHWT9GTJ3yK3RNbrh_Cgw5y7iCcrKW26ZiuhtuFMP1_m2oq9w/pub?output=xlsx",
   editUrl: "https://docs.google.com/spreadsheets/d/1bYTTqMAzStLacx2f6-Y6Eow7RpTemAdX/edit",
   refreshMinutes: 5,
+  /* Список фото из Google Диска (веб-приложение Apps Script, см. tools/photos-apps-script.gs).
+     Пока пусто — фото показываются встроенным окном Google Диска. */
+  photosApi: "",
 };
 
 const DEFAULT_DATA = {
@@ -1492,17 +1499,55 @@ const driveFolderId = (u) => {
   const m = String(u || "").match(/^https:\/\/drive\.google\.com\/(?:drive\/(?:u\/\d+\/)?folders\/|open\?id=)([\w-]{10,})/i);
   return m ? m[1] : "";
 };
+/* ---- Список фото (Apps Script): своя галерея вместо окна Google Диска ---- */
+let photoIndex = null, photoLoading = false;
+async function loadPhotoIndex() {
+  if (!SHEET.photosApi || photoLoading) return;
+  photoLoading = true;
+  try {
+    const r = await fetch(SHEET.photosApi, { cache: "no-store" });
+    if (!r.ok) throw new Error("http " + r.status);
+    const j = await r.json();
+    if (j && j.folders && typeof j.folders === "object") { photoIndex = j.folders; renderAll(true); }
+  } catch (e) { /* остаётся встроенное окно Google Диска */ }
+  finally { photoLoading = false; }
+}
+const pkey = (s) => String(s ?? "").trim().toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ");
+function photoFolderFiles(id, name) {
+  if (!photoIndex) return null;
+  for (const f of Object.values(photoIndex)) if (f && f.id === id) return f.files || [];
+  for (const [n, f] of Object.entries(photoIndex)) if (pkey(n) === pkey(name)) return (f && f.files) || [];
+  return null;
+}
+const SAFE_ID = /^[\w-]{10,}$/;
+function photoGrid(files) {
+  const ok = files.filter((f) => f && SAFE_ID.test(f.id));
+  if (!ok.length) return `<div class="chart-empty">В папке пока нет фотографий.</div>`;
+  return `<div class="photo-grid">${ok.map((f) => `
+      <a class="photo-thumb" href="https://drive.google.com/file/d/${f.id}/view" target="_blank" rel="noopener noreferrer" title="${esc(f.name || "")}">
+        <img src="https://lh3.googleusercontent.com/d/${f.id}=w480" alt="${esc(f.name || "Фото")}" loading="lazy" referrerpolicy="no-referrer">
+      </a>`).join("")}</div>`;
+}
+
 function renderPhotos(p) {
   const links = (p.photos || []).filter(([, u]) => /^https?:\/\//i.test(u));
   const folders = [];
   if (PHOTO_FOLDERS[p.name]) folders.push(PHOTO_FOLDERS[p.name]);
+  /* Подпапка с тем же именем, что у программы, подключается сама (по списку фото) */
+  if (photoIndex) for (const [n, f] of Object.entries(photoIndex)) {
+    if (f && SAFE_ID.test(f.id) && pkey(n) === pkey(p.name) && !folders.includes(f.id)) folders.push(f.id);
+  }
   links.forEach(([, u]) => { const id = driveFolderId(u); if (id && !folders.includes(id)) folders.push(id); });
   const others = links.filter(([, u]) => !driveFolderId(u));
   if (!folders.length && !others.length) return "";
-  const gallery = folders.map((id) => `
+  const gallery = folders.map((id) => {
+    const files = photoFolderFiles(id, p.name);
+    const open = `<a class="btn photo-link" href="https://drive.google.com/drive/folders/${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer">Открыть папку целиком ↗</a>`;
+    if (files) return photoGrid(files) + open;
+    return `
       <iframe class="photo-frame" src="https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(id)}#grid"
-        title="Фотографии: ${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer"></iframe>
-      <a class="btn photo-link" href="https://drive.google.com/drive/folders/${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer">Открыть папку целиком ↗</a>`).join("");
+        title="Фотографии: ${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer"></iframe>` + open;
+  }).join("");
   /* Свёрнуто по умолчанию; галерея грузится только после раскрытия */
   return `<details class="chart-card photo-box" data-name="${esc(p.name)}"${photosOpen.has(p.name) ? " open" : ""}>
       <summary class="btn photo-toggle"><span class="when-closed">▾ Показать фотографии</span><span class="when-open">▴ Скрыть фотографии</span></summary>
@@ -2464,6 +2509,8 @@ if (EDIT_MODE) {
 
 renderAll();
 if (LIVE) loadSheet(false);
+loadPhotoIndex();
+if (SHEET.photosApi) setInterval(loadPhotoIndex, 10 * 60e3);
 </script>
 </body>
 </html>
