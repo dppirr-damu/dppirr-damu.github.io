@@ -1421,8 +1421,34 @@ function loadCache() {
 const EDIT_MODE = new URLSearchParams(location.search).get("mode") === "edit";
 
 let cached = LIVE ? loadCache() : null;
-let state = LIVE ? (cached ? cached.data : clone(DEFAULT_DATA))
-                 : (EDIT_MODE ? loadState() : clone(DEFAULT_DATA));
+/* ============================================================
+   ПОРЯДОК ПРОГРАММ/ПРОЕКТОВ на сайте и в выгрузках.
+   Сопоставление по названию (строка «Название» в таблице).
+   Направления, которых нет в списке, идут после — в порядке листов таблицы.
+   ============================================================ */
+const ORDER = [
+  "Арманнан Іске",
+  "Онлайн-курсы",
+  "Центр поддержки и сопровождения бизнеса",
+  "Франшизы",
+  "Единый фронт-офис",
+  "Мобильный фронт-офис",
+  "Единый контакт-центр",
+  "Консалтинговые компании",
+  "Маркетплейсы",
+  "Взаимодействие с NACOFEC",
+  "Дни открытых дверей",
+];
+function applyOrder(data) {
+  const key = (s) => String(s ?? "").trim().toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ");
+  const pos = new Map(ORDER.map((n, k) => [key(n), k]));
+  const rank = (p, k) => (pos.has(key(p.name)) ? pos.get(key(p.name)) : ORDER.length + k);
+  data.programs = data.programs.map((p, k) => [p, rank(p, k)]).sort((a, b) => a[1] - b[1]).map(([p]) => p);
+  return data;
+}
+
+let state = applyOrder(LIVE ? (cached ? cached.data : clone(DEFAULT_DATA))
+                            : (EDIT_MODE ? loadState() : clone(DEFAULT_DATA)));
 
 function toast(msg) {
   const t = $("toast");
@@ -2208,6 +2234,7 @@ function parseWorkbook(wb, X) {
   });
   if (!progs.length) throw new Error("no-programs");
   data.programs = progs.sort((a, b) => a.n - b.n).map((o) => o.p);
+  applyOrder(data);
   return data;
 }
 
